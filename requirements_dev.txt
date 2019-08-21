@@ -1,0 +1,16 @@
+pip==18.1
+bumpversion==0.5.3
+wheel==0.32.1
+watchdog==0.9.0
+flake8==3.5.0
+tox==3.5.2
+coverage==4.5.1
+Sphinx==1.8.1
+twine==1.12.1
+
+motor>=2.0.0
+fastapi>=0.35.0
+ujson>=1.35
+
+pytest==3.8.2
+pytest-runner==4.2
