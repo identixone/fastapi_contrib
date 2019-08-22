@@ -38,7 +38,7 @@ setup(
     include_package_data=True,
     keywords="fastapi_contrib",
     name="fastapi_contrib",
-    packages=find_packages(include=["fastapi_contrib"]),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
