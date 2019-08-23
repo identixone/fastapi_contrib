@@ -30,7 +30,14 @@ Opinionated set of utilities on top of FastAPI
 Features
 --------
 
-* TODO
+* Auth Backend & Middleware (User or None in every request object)
+* Permissions: reusable class permissions, specify multiple as FastAPI Dependency
+* ModelSerializers: serialize (pydantic) incoming request, connect data with DB model and save
+* UJSONResponse: correctly show slashes in fields with URLs
+* Limit-Offset Pagination: use it as FastAPI Dependency (works only with ModelSerializers for now)
+* MongoDB integration: Use models as if it was Django (based on pydantic models)
+* MongoDB indices verification on startup of the app
+* Custom Exceptions and Custom Exception Handlers
 
 Credits
 -------
