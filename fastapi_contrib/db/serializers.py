@@ -4,13 +4,13 @@ from pydantic import BaseModel, create_model
 
 
 class Serializer(BaseModel):
+
     @classmethod
     def sanitize_list(cls, iterable: Iterable) -> List[dict]:
         def clean_d(d):
             for e in cls.Meta.exclude:
                 d.pop(e)
             return d
-
         return list(map(lambda x: clean_d(x), iterable))
 
     async def save(self):
@@ -20,7 +20,7 @@ class Serializer(BaseModel):
         return instance
 
     def dict(self, *args, **kwargs) -> dict:
-        exclude = kwargs.get("exclude")
+        exclude = kwargs.get('exclude')
         if not exclude:
             exclude = set()
 
@@ -38,6 +38,7 @@ class Serializer(BaseModel):
 
 
 class ModelSerializer(Serializer):
+
     def __new__(cls, *args, **kwargs):
         _fields = {}
         for f, t in cls.Meta.model.__fields__.items():

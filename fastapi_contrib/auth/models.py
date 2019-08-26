@@ -1,15 +1,14 @@
-import hashlib
-import os
-
 from datetime import datetime
-from pymongo import IndexModel, ASCENDING
 from pydantic import EmailStr, constr, validator
+from pymongo import IndexModel, ASCENDING
 
+from fastapi_contrib.auth.utils import generate_token
 from fastapi_contrib.db.models import MongoDBTimeStampedModel
 
 
 class User(MongoDBTimeStampedModel):
     email: EmailStr
+    # todo: pwd with configurable hash function
 
     class Meta:
         collection = "users"
@@ -21,16 +20,11 @@ class Token(MongoDBTimeStampedModel):
     expires: datetime = None
     is_active: bool = True
 
-    @classmethod
-    def generate_key(cls):
-        result = hashlib.blake2b(os.urandom(64))
-        return result.hexdigest()
-
     @validator("key", pre=True, always=True)
     def set_key(cls, v, values, **kwargs):
         if v:
             return v
-        return cls.generate_key()
+        return generate_token()
 
     class Meta:
         collection = "tokens"

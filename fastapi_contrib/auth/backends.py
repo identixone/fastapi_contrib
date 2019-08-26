@@ -1,7 +1,7 @@
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.authentication import AuthenticationBackend, AuthenticationError
 
-from fastapi_contrib.auth.models import Token, User
+from fastapi_contrib.auth.utils import get_token_model, get_user_model
 
 
 class AuthBackend(AuthenticationBackend):
@@ -14,11 +14,16 @@ class AuthBackend(AuthenticationBackend):
             raise AuthenticationError("Not authenticated")
         if scheme.lower() != "token":
             raise AuthenticationError("Invalid authentication credentials")
+
+        Token = get_token_model()
         token = await Token.get(key=credentials)
         if token is None:
             return False, None
         conn.scope["token"] = token
+
+        User = get_user_model()
         user = await User.get(id=token.user_id)
         if user is None:
             return False, None
+
         return True, user

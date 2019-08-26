@@ -2,6 +2,7 @@ from pymongo.collection import Collection
 from pymongo.results import InsertOneResult, DeleteResult
 
 from fastapi_contrib.db.models import MongoDBModel
+from fastapi_contrib.common.utils import get_current_app
 
 
 class MongoDBClient(object):
@@ -11,9 +12,10 @@ class MongoDBClient(object):
 
     __instance = None
 
-    def __new__(cls, app=None):
+    def __new__(cls):
         if cls.__instance is None:
             cls.__instance = object.__new__(cls)
+            app = get_current_app()
             cls.__instance.mongodb = app.mongodb
         return cls.__instance
 

@@ -38,6 +38,7 @@ Features
 * MongoDB integration: Use models as if it was Django (based on pydantic models)
 * MongoDB indices verification on startup of the app
 * Custom Exceptions and Custom Exception Handlers
+* StateRequestIDMiddleware: receives configurable header and saves it in request state
 
 Credits
 -------

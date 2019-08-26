@@ -1,12 +1,8 @@
-import time
-import random
-import sys
-
-from bson import ObjectId
 from datetime import datetime
 from pydantic import validator, BaseModel
-from uuid import uuid4
-from fastapi_contrib.db.utils import get_db_client
+
+from fastapi_contrib.common.utils import async_timing
+from fastapi_contrib.db.utils import get_db_client, get_next_id, get_now
 
 
 class MongoDBModel(BaseModel):
@@ -18,33 +14,17 @@ class MongoDBModel(BaseModel):
             return values["_id"]
         if v:
             return v
-        return cls.next_id()
 
-    @classmethod
-    def seq_id(cls):
-        oid = ObjectId()
-        # Last 3 bytes is a counter, starting with a random value.
-        # https://docs.mongodb.com/manual/reference/method/ObjectId/
-        bytes_counter = oid.binary[:3]
-        return int.from_bytes(bytes_counter, byteorder=sys.byteorder)
-
-    @classmethod
-    def next_id(cls):
-        """
-        :return: 64-bit int ID
-        """
-        bit_size = 64
-        unique_id = uuid4().int >> bit_size
-        return unique_id
+        return get_next_id()
 
     @classmethod
     def get_db_collection(cls):
         return cls.Meta.collection
 
     @classmethod
+    @async_timing
     async def get(cls, **kwargs):
-        app = kwargs.pop('app') if 'app' in kwargs else None
-        db = get_db_client(app=app)
+        db = get_db_client()
         result = await db.get(cls, **kwargs)
         if not result:
             return None
@@ -53,22 +33,25 @@ class MongoDBModel(BaseModel):
         return cls(**result)
 
     @classmethod
+    @async_timing
     async def delete(cls, **kwargs):
         db = get_db_client()
         result = await db.delete(cls, **kwargs)
         return result
 
     @classmethod
+    @async_timing
     async def count(cls, **kwargs):
         db = get_db_client()
         result = await db.count(cls, **kwargs)
         return result
 
     @classmethod
-    async def list(cls, raw=True, _limit=0, _offset=0, **kwargs):
+    @async_timing
+    async def list(cls, raw=True, _limit=0, _offset=0, length=100, **kwargs):
         db = get_db_client()
         cursor = db.list(cls, _limit=_limit, _offset=_offset, **kwargs)
-        result = await cursor.to_list(length=100)
+        result = await cursor.to_list(length=length)
 
         for _dict in result:
             _dict.update({"id": _dict.pop("_id")})
@@ -78,12 +61,14 @@ class MongoDBModel(BaseModel):
 
         return result
 
+    @async_timing
     async def save(self, include=None, exclude=None):
         db = get_db_client()
         insert_result = await db.insert(self, include=include, exclude=exclude)
         self.id = insert_result.inserted_id
 
     @classmethod
+    @async_timing
     async def create_indexes(cls):
         if hasattr(cls.Meta, 'indexes'):
             db = get_db_client()
@@ -101,4 +86,4 @@ class MongoDBTimeStampedModel(MongoDBModel):
     def set_created_now(cls, v):
         if v:
             return v
-        return datetime.utcnow()
+        return get_now()
