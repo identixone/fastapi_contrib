@@ -5,7 +5,7 @@ import sys
 from bson import ObjectId
 from datetime import datetime
 from pydantic import validator, BaseModel
-
+from uuid import uuid4
 from fastapi_contrib.db.utils import get_db_client
 
 
@@ -33,12 +33,9 @@ class MongoDBModel(BaseModel):
         """
         :return: 64-bit int ID
         """
-        incr = cls.seq_id() % 512
-        now_millis = int(round(time.time() * 1000))
-        result = now_millis << 23
-        result |= incr % random.randint(1, 512) << 10
-        result |= incr
-        return result
+        bit_size = 64
+        unique_id = uuid4().int >> bit_size
+        return unique_id
 
     @classmethod
     def get_db_collection(cls):
@@ -46,7 +43,8 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     async def get(cls, **kwargs):
-        db = get_db_client()
+        app = kwargs.pop('app') if 'app' in kwargs else None
+        db = get_db_client(app=app)
         result = await db.get(cls, **kwargs)
         if not result:
             return None
