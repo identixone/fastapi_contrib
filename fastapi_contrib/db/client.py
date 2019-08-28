@@ -31,6 +31,15 @@ class MongoDBClient(object):
         collection = self.get_collection(collection_name)
         return await collection.insert_one(data, session=session)
 
+    async def update(
+        self, model: MongoDBModel, session=None, include=None, exclude=None
+    ) -> InsertOneResult:
+        data = model.dict(include=include, exclude=exclude)
+        doc_id = data.pop("id")
+        collection_name = model.get_db_collection()
+        collection = self.get_collection(collection_name)
+        return await collection.update_one({"_id": doc_id}, **data, session=session)
+    
     async def count(self, model: MongoDBModel, session=None, **kwargs) -> int:
         _id = kwargs.pop("id", None)
         if _id is not None:

@@ -19,6 +19,12 @@ class Serializer(BaseModel):
         self.id = instance.id
         return instance
 
+    async def update(self):
+        instance = self.Meta.model(**self.__values__)
+        await instance.update()
+        self.id = instance.id
+        return instance
+    
     def dict(self, *args, **kwargs) -> dict:
         exclude = kwargs.get('exclude')
         if not exclude:
