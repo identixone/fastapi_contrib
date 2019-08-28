@@ -1,5 +1,5 @@
 from pymongo.collection import Collection
-from pymongo.results import InsertOneResult, DeleteResult
+from pymongo.results import InsertOneResult, DeleteResult, UpdateResult
 
 from fastapi_contrib.db.models import MongoDBModel
 from fastapi_contrib.common.utils import get_current_app
@@ -52,6 +52,18 @@ class MongoDBClient(object):
         collection = self.get_collection(collection_name)
         res = await collection.delete_many(kwargs, session=session)
         return res
+
+    async def update_one(self, model: MongoDBModel, session=None, filter_kwargs: dict = {}, **kwargs
+            ): -> UpdateResult
+        _id = filter_kwargs.pop("id", None)
+        if _id is not None:
+            filter_kwargs["_id"] = _id
+
+        collection_name = model.get_db_collection()
+        collection = self.get_collection(collection_name)
+        res = await collection.update_one(filter_kwargs, kwargs, session=session)
+        return res
+        
 
     async def get(self, model: MongoDBModel, session=None, **kwargs) -> dict:
         _id = kwargs.pop("id", None)
