@@ -54,7 +54,7 @@ class MongoDBClient(object):
         return res
 
     async def update_one(self, model: MongoDBModel, session=None, filter_kwargs: dict = {}, **kwargs
-            ): -> dict
+            ): -> UpdateResult
         _id = filter_kwargs.pop("id", None)
         if _id is not None:
             filter_kwargs["_id"] = _id
@@ -62,6 +62,7 @@ class MongoDBClient(object):
         collection_name = model.get_db_collection()
         collection = self.get_collection(collection_name)
         res = await collection.update_one(filter_kwargs, kwargs, session=session)
+        return res
         
 
     async def get(self, model: MongoDBModel, session=None, **kwargs) -> dict:
