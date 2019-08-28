@@ -19,9 +19,9 @@ class Serializer(BaseModel):
         self.id = instance.id
         return instance
 
-    async def update(self):
+    async def update_one(self, filter_kwargs: dict = {}):
         instance = self.Meta.model(**self.__values__)
-        await instance.update()
+        await instance.update_one(filter_kwargs, self.dict())
         self.id = instance.id
         return instance
     

@@ -68,9 +68,9 @@ class MongoDBModel(BaseModel):
         self.id = insert_result.inserted_id
     
     @async_timing
-    async def update(self, include=None, exclude=None):
+    async def update_one(self, filter_kwargs: dict = {}, **kwargs):
         db = get_db_client()
-        insert_result = await db.update(self, include=include, exclude=exclude)
+        insert_result = await db.update_one(self, filter_kwargs=filter_kwargs, **kwargs)
         self.id = insert_result.inserted_id
 
     @classmethod
