@@ -16,6 +16,7 @@ def resolve_dotted_path(path: str):
 
 
 def get_current_app():
+    # TODO: cache this
     app = resolve_dotted_path(settings.fastapi_app)
     return app
 

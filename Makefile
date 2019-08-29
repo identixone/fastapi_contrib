@@ -54,16 +54,10 @@ lint: ## check style with flake8
 	flake8 fastapi_contrib tests
 
 test: ## run tests quickly with the default Python
-	py.test
+	py.test --cov=fastapi_contrib --cov-report=term-missing:skip-covered --cov-branch --cov-fail-under=100
 
 test-all: ## run tests on every Python version with tox
 	tox
-
-coverage: ## check code coverage quickly with the default Python
-	coverage run --source fastapi_contrib -m pytest
-	coverage report -m
-	coverage html
-	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/fastapi_contrib.rst

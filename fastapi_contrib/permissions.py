@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
-from fastapi.exceptions import HTTPException
+
+from starlette import status
 from starlette.requests import Request
+
+from fastapi_contrib.exceptions import HTTPException
 
 
 class BasePermission(ABC):
-    error_msg = None
-    status_code = None
+    error_msg = "Forbidden."
+    status_code = status.HTTP_403_FORBIDDEN
+    error_code = status.HTTP_403_FORBIDDEN
 
     @abstractmethod
     def has_required_permisions(self, request: Request) -> bool:
@@ -15,7 +19,8 @@ class BasePermission(ABC):
         if not self.has_required_permisions(request):
             raise HTTPException(
                 status_code=self.status_code,
-                detail=self.error_msg
+                detail=self.error_msg,
+                error_code=self.error_code
             )
 
 

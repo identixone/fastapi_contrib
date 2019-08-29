@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import EmailStr, constr, validator
+from pydantic import constr, validator
 from pymongo import IndexModel, ASCENDING
 
 from fastapi_contrib.auth.utils import generate_token
@@ -7,7 +7,8 @@ from fastapi_contrib.db.models import MongoDBTimeStampedModel
 
 
 class User(MongoDBTimeStampedModel):
-    email: EmailStr
+    username: str
+    # todo: optional email dependency
     # todo: pwd with configurable hash function
 
     class Meta:

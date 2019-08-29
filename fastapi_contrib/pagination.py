@@ -5,11 +5,18 @@ from starlette.requests import Request
 
 class Pagination(object):
     def __init__(self, request: Request, offset: int = 0, limit: int = 100):
+        """
+        Query params parser and db collection paginator in one.
+        :param request: starlette Request object
+        :param offset: query param of how many records to skip
+        :param limit: query param of how many records to show
+        """
         self.request = request
         self.offset = offset
         self.limit = limit
         self.model = None
         self.count = None
+        self.list = []
 
     async def get_count(self, **kwargs):
         self.count = await self.model.count(**kwargs)
@@ -37,14 +44,18 @@ class Pagination(object):
             )
         )
 
+    async def get_list(self, **kwargs):
+        self.list = await self.model.list(
+            _limit=self.limit, _offset=self.offset, raw=True, **kwargs
+        )
+        return self.list
+
     async def paginate(self, serializer_class, **kwargs):
         self.model = serializer_class.Meta.model
         count, _list = await asyncio.gather(
-            self.get_count(**kwargs),
-            self.model.list(
-                _limit=self.limit, _offset=self.offset, raw=True, **kwargs
-            ),
+            self.get_count(**kwargs), self.get_list(**kwargs)
         )
+        # TODO: think about naming and separation of concerns
         _list = serializer_class.sanitize_list(_list)
         return {
             "count": count,

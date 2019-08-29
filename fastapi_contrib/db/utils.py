@@ -20,12 +20,14 @@ def default_id_generator():
 
 
 def get_now():
+    # TODO: cache this
     if settings.now_function:
         return resolve_dotted_path(settings.now_function)()
     return datetime.utcnow()
 
 
 def get_next_id():
+    # TODO: cache this
     id_generator = resolve_dotted_path(settings.mongodb_id_generator)
     return id_generator()
 
