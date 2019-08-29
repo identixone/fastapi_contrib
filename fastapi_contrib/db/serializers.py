@@ -21,7 +21,7 @@ class Serializer(BaseModel):
 
     async def update_one(self, filter_kwargs: dict = {}):
         instance = self.Meta.model(**self.__values__)
-        await instance.update_one(filter_kwargs, self.dict())
+        await instance.update_one(filter_kwargs=filter_kwargs, **self.dict())
         return instance
 
     def dict(self, *args, **kwargs) -> dict:
