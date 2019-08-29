@@ -1,16 +1,17 @@
-pip==18.1
+pip==19.2.3
 bumpversion==0.5.3
-wheel==0.32.1
+wheel==0.33.6
 watchdog==0.9.0
-flake8==3.5.0
-tox==3.5.2
-coverage==4.5.1
-Sphinx==1.8.1
-twine==1.12.1
+Sphinx==2.2.0
+twine==1.13.0
 
 motor>=2.0.0
 fastapi>=0.35.0
 ujson>=1.35
 
-pytest==3.8.2
-pytest-runner==4.2
+coverage==4.5.4
+flake8==3.7.8
+pytest==5.1.1
+pytest-runner==5.1
+pytest-cov==2.7.1
+tox==3.13.2
