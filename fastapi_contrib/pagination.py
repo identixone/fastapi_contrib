@@ -2,6 +2,8 @@ import asyncio
 
 from starlette.requests import Request
 
+from fastapi_contrib.db.serializers import Serializer
+
 
 class Pagination(object):
     def __init__(self, request: Request, offset: int = 0, limit: int = 100):
@@ -18,11 +20,11 @@ class Pagination(object):
         self.count = None
         self.list = []
 
-    async def get_count(self, **kwargs):
+    async def get_count(self, **kwargs) -> int:
         self.count = await self.model.count(**kwargs)
         return self.count
 
-    def get_next_url(self):
+    def get_next_url(self) -> str:
         if self.offset + self.limit >= self.count:
             return None
         return str(
@@ -31,7 +33,7 @@ class Pagination(object):
             )
         )
 
-    def get_previous_url(self):
+    def get_previous_url(self) -> str:
         if self.offset <= 0:
             return None
 
@@ -44,13 +46,13 @@ class Pagination(object):
             )
         )
 
-    async def get_list(self, **kwargs):
+    async def get_list(self, **kwargs) -> list:
         self.list = await self.model.list(
             _limit=self.limit, _offset=self.offset, raw=True, **kwargs
         )
         return self.list
 
-    async def paginate(self, serializer_class, **kwargs):
+    async def paginate(self, serializer_class: Serializer, **kwargs) -> dict:
         self.model = serializer_class.Meta.model
         count, _list = await asyncio.gather(
             self.get_count(**kwargs), self.get_list(**kwargs)
