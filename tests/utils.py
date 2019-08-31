@@ -1,5 +1,17 @@
 import logging
 
+from unittest.mock import MagicMock
+
+
+def AsyncMock(*args, **kwargs):
+    m = MagicMock(*args, **kwargs)
+
+    async def mock_coro(*args, **kwargs):
+        return m(*args, **kwargs)
+
+    mock_coro.mock = m
+    return mock_coro
+
 
 def override_settings(**decorator_kwargs):
     def decorator(function):

@@ -2,8 +2,8 @@ import importlib
 import motor.motor_asyncio
 import pkgutil
 import pyclbr
+import random
 import os
-import uuid
 
 from datetime import datetime
 
@@ -16,7 +16,7 @@ def default_id_generator():
     :return: 64-bit int ID
     """
     bit_size = 64
-    return uuid.uuid4().int >> bit_size
+    return random.getrandbits(bit_size)
 
 
 def get_now():

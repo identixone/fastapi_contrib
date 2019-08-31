@@ -1,11 +1,12 @@
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.authentication import AuthenticationBackend, AuthenticationError
+from starlette.requests import HTTPConnection
 
 from fastapi_contrib.auth.utils import get_token_model, get_user_model
 
 
 class AuthBackend(AuthenticationBackend):
-    async def authenticate(self, conn):
+    async def authenticate(self, conn: HTTPConnection):
         authorization: str = conn.headers.get("Authorization")
         if not authorization:
             return False, None

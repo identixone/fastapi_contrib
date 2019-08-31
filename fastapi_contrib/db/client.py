@@ -1,4 +1,5 @@
 from pymongo.collection import Collection
+from pymongo.cursor import Cursor
 from pymongo.results import InsertOneResult, DeleteResult, UpdateResult
 
 from fastapi_contrib.db.models import MongoDBModel
@@ -12,7 +13,7 @@ class MongoDBClient(object):
 
     __instance = None
 
-    def __new__(cls):
+    def __new__(cls) -> "MongoDBClient":
         if cls.__instance is None:
             cls.__instance = object.__new__(cls)
             app = get_current_app()
@@ -53,7 +54,8 @@ class MongoDBClient(object):
         res = await collection.delete_many(kwargs, session=session)
         return res
 
-    async def update_one(self, model: MongoDBModel, session=None, filter_kwargs: dict = {}, **kwargs
+    async def update_one(
+        self, model: MongoDBModel, filter_kwargs: dict, session=None, **kwargs
     ) -> UpdateResult:
         _id = filter_kwargs.pop("id", None)
         if _id is not None:
@@ -61,7 +63,9 @@ class MongoDBClient(object):
 
         collection_name = model.get_db_collection()
         collection = self.get_collection(collection_name)
-        res = await collection.update_one(filter_kwargs, {"$set": kwargs}, session=session)
+        res = await collection.update_one(
+            filter_kwargs, {"$set": kwargs}, session=session
+        )
         return res
 
     async def get(self, model: MongoDBModel, session=None, **kwargs) -> dict:
@@ -76,7 +80,7 @@ class MongoDBClient(object):
 
     def list(
         self, model: MongoDBModel, session=None, _offset=0, _limit=0, **kwargs
-    ):
+    ) -> Cursor:
         _id = kwargs.pop("id", None)
         if _id is not None:
             kwargs["_id"] = _id
