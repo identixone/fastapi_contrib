@@ -1,4 +1,8 @@
+import copy
+
 from datetime import datetime
+from typing import List
+
 from pydantic import validator, BaseModel
 
 from fastapi_contrib.common.utils import async_timing
@@ -10,8 +14,7 @@ class MongoDBModel(BaseModel):
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v, values, **kwargs):
-        if "_id" in values and v != values["_id"]:
-            return values["_id"]
+        # TODO: read_only_fields
         if v:
             return v
 
@@ -53,8 +56,10 @@ class MongoDBModel(BaseModel):
         cursor = db.list(cls, _limit=_limit, _offset=_offset, **kwargs)
         result = await cursor.to_list(length=length)
 
+        # TODO: write more elegant solution
+        result = copy.deepcopy(result)
         for _dict in result:
-            _dict.update({"id": _dict.pop("_id")})
+            _dict["id"] = _dict.pop("_id")
 
         if not raw:
             return (cls(**record) for record in result)
@@ -69,23 +74,29 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def update_one(cls, filter_kwargs: dict = {}, **kwargs):
+    async def update_one(cls, filter_kwargs: dict, **kwargs):
         db = get_db_client()
-        update_result = await db.update_one(cls, filter_kwargs=filter_kwargs, **kwargs)
+        result = await db.update_one(
+            cls, filter_kwargs=filter_kwargs, **kwargs
+        )
+        return result
 
     @classmethod
     @async_timing
-    async def update_many(cls, filter_kwargs: dict = {}, **kwargs):
+    async def update_many(cls, filter_kwargs: dict, **kwargs):
         db = get_db_client()
-        update_result = await db.update_many(cls, filter_kwargs=filter_kwargs, **kwargs)
+        result = await db.update_many(
+            cls, filter_kwargs=filter_kwargs, **kwargs
+        )
+        return result
 
     @classmethod
     @async_timing
-    async def create_indexes(cls):
-        if hasattr(cls.Meta, 'indexes'):
+    async def create_indexes(cls) -> List[str]:
+        if hasattr(cls.Meta, "indexes"):
             db = get_db_client()
             collection = db.get_collection(cls.Meta.collection)
-            await collection.create_indexes(cls.Meta.indexes)
+            return await collection.create_indexes(cls.Meta.indexes)
 
     class Config:
         anystr_strip_whitespace = True

@@ -3,9 +3,9 @@ import motor.motor_asyncio
 import pkgutil
 import pyclbr
 import random
-import os
 
 from datetime import datetime
+from typing import List
 
 from fastapi_contrib.common.utils import resolve_dotted_path
 from fastapi_contrib.conf import settings
@@ -43,22 +43,28 @@ def get_db_client():
     return client
 
 
-def get_models():
+def get_models() -> list:
     from fastapi_contrib.db.models import MongoDBModel
-
-    path = os.path.dirname(settings.project_root)
+    apps_folder_name = settings.apps_folder_name
+    path = settings.project_root
     models = []
     for app in settings.apps:
         modules = [f[1] for f in pkgutil.walk_packages(path=[f"{path}/{app}"])]
         if "models" in modules:
-            module_models = pyclbr.readmodule(f"apps.{app}.models").keys()
-            mudule = importlib.import_module(f"apps.{app}.models")
+            try:
+                module_models = pyclbr.readmodule(f"{apps_folder_name}.{app}.models").keys()
+            except AttributeError:
+                # TODO: print warning or something
+                continue
+            mudule = importlib.import_module(f"{apps_folder_name}.{app}.models")
             models.extend([getattr(mudule, model) for model in module_models])
 
     return list(filter(lambda x: issubclass(x, MongoDBModel), models))
 
 
-async def create_indexes():
+async def create_indexes() -> List[str]:
     models = get_models()
+    indexes = []
     for model in models:
-        await model.create_indexes()
+        indexes.append(await model.create_indexes())
+    return list(filter(None, indexes))

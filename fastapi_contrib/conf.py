@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     token_generator: str = "fastapi_contrib.auth.utils.default_token_generator"
 
     apps: List[str] = []
+    apps_folder_name: str = "apps"
 
     class Config:
         env_prefix = "CONTRIB_"

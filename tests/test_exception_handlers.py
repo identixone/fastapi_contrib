@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from unittest.mock import MagicMock
 
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.testclient import TestClient
 
-from fastapi_contrib.exception_handlers import setup_exception_handlers
-
+from fastapi_contrib.exception_handlers import setup_exception_handlers, \
+    parse_raw_error
 
 app = FastAPI()
 
@@ -79,3 +80,18 @@ def test_exception_handler_pydantic_validationerror_model():
         assert response.status_code == 400
         response = response.json()
         assert response["code"] == 400
+
+
+def test_parse_raw_error_edge_cases():
+    # TODO: this should be tested through exception raising somehow
+    err = MagicMock()
+    err.loc = ("field",)
+    err.msg = "This field contains an error."
+    parsed_dict = parse_raw_error(err)
+    assert parsed_dict == {"name": err.loc[0], "message": err.msg}
+
+    err = MagicMock()
+    err.loc = ()
+    err.msg = "This field contains an error."
+    parsed_dict = parse_raw_error(err)
+    assert parsed_dict == {"name": "__all__", "message": err.msg}

@@ -2,6 +2,7 @@ from abc import ABC
 from typing import Iterable, List
 
 from pydantic import BaseModel, create_model, Required
+from pymongo.results import UpdateResult
 
 
 class AbstractMeta(ABC):
@@ -30,10 +31,9 @@ class Serializer(BaseModel):
             self.id = instance.id
             return instance
 
-    async def update_one(self, filter_kwargs):
-        instance = self.Meta.model(**self.__values__)
-        await instance.update_one(filter_kwargs=filter_kwargs, **self.dict())
-        return instance
+    async def update_one(self, filter_kwargs) -> UpdateResult:
+        return await self.Meta.model.update_one(
+            filter_kwargs=filter_kwargs, **self.dict())
 
     def dict(self, *args, **kwargs) -> dict:
         exclude = kwargs.get("exclude")

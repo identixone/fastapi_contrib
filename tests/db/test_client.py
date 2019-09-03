@@ -90,11 +90,11 @@ async def test_get():
     client = MongoDBClient()
     model = Model(id=1)
     _dict = await client.get(model, id=1)
-    assert _dict == {"id": 1}
+    assert _dict == {"_id": 1}
 
     # Test whether it correctly handles filter by non-id
     _dict = await client.get(model, field="value")
-    assert _dict == {"id": 1}
+    assert _dict == {"_id": 1}
 
 
 @pytest.mark.asyncio
