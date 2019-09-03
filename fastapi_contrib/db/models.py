@@ -66,11 +66,18 @@ class MongoDBModel(BaseModel):
         db = get_db_client()
         insert_result = await db.insert(self, include=include, exclude=exclude)
         self.id = insert_result.inserted_id
-    
+
+    @classmethod
     @async_timing
-    async def update_one(self, filter_kwargs: dict = {}, **kwargs):
+    async def update_one(cls, filter_kwargs: dict = {}, **kwargs):
         db = get_db_client()
-        update_result = await db.update_one(self, filter_kwargs=filter_kwargs, **kwargs)
+        update_result = await db.update_one(cls, filter_kwargs=filter_kwargs, **kwargs)
+
+    @classmethod
+    @async_timing
+    async def update_many(cls, filter_kwargs: dict = {}, **kwargs):
+        db = get_db_client()
+        update_result = await db.update_many(cls, filter_kwargs=filter_kwargs, **kwargs)
 
     @classmethod
     @async_timing
