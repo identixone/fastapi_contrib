@@ -68,6 +68,20 @@ class MongoDBClient(object):
         )
         return res
 
+    async def update_many(
+        self, model: MongoDBModel, filter_kwargs: dict, session=None, **kwargs
+    ) -> UpdateResult:
+        _id = filter_kwargs.pop("id", None)
+        if _id is not None:
+            filter_kwargs["_id"] = _id
+
+        collection_name = model.get_db_collection()
+        collection = self.get_collection(collection_name)
+        res = await collection.update_many(
+            filter_kwargs, {"$set": kwargs}, session=session
+        )
+        return res
+
     async def get(self, model: MongoDBModel, session=None, **kwargs) -> dict:
         _id = kwargs.pop("id", None)
         if _id is not None:
