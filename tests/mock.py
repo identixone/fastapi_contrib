@@ -25,6 +25,9 @@ class MongoDBCollectionMock(MagicMock):
         self.update_one = AsyncMock(
             return_value=UpdateResult(raw_result={}, acknowledged=True)
         )
+        self.update_many = AsyncMock(
+            return_value=UpdateResult(raw_result={}, acknowledged=True)
+        )
         cursor = MagicMock()
         cursor.to_list = AsyncMock(return_value=[{"_id": 1}])
         self.find = MagicMock(return_value=cursor)

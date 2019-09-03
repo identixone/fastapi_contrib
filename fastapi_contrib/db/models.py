@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import List
 
 from pydantic import validator, BaseModel
+from pymongo.results import UpdateResult
 
 from fastapi_contrib.common.utils import async_timing
 from fastapi_contrib.db.utils import get_db_client, get_next_id, get_now
@@ -74,7 +75,7 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def update_one(cls, filter_kwargs: dict, **kwargs):
+    async def update_one(cls, filter_kwargs: dict, **kwargs) -> UpdateResult:
         db = get_db_client()
         result = await db.update_one(
             cls, filter_kwargs=filter_kwargs, **kwargs
@@ -83,7 +84,7 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def update_many(cls, filter_kwargs: dict, **kwargs):
+    async def update_many(cls, filter_kwargs: dict, **kwargs) -> UpdateResult:
         db = get_db_client()
         result = await db.update_many(
             cls, filter_kwargs=filter_kwargs, **kwargs

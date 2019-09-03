@@ -15,8 +15,10 @@ class Serializer(BaseModel):
     @classmethod
     def sanitize_list(cls, iterable: Iterable) -> List[dict]:
         def clean_d(d):
-            for e in cls.Meta.exclude:
-                d.pop(e, None)
+            if hasattr(cls.Meta, "exclude"):
+                for e in cls.Meta.exclude:
+                    d.pop(e, None)
+                return d
             return d
 
         return list(map(lambda x: clean_d(x), iterable))
@@ -33,6 +35,10 @@ class Serializer(BaseModel):
 
     async def update_one(self, filter_kwargs) -> UpdateResult:
         return await self.Meta.model.update_one(
+            filter_kwargs=filter_kwargs, **self.dict())
+
+    async def update_many(self, filter_kwargs) -> UpdateResult:
+        return await self.Meta.model.update_many(
             filter_kwargs=filter_kwargs, **self.dict())
 
     def dict(self, *args, **kwargs) -> dict:

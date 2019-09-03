@@ -86,6 +86,23 @@ async def test_update_one():
 
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
+async def test_update_many():
+    client = MongoDBClient()
+    model = Model(id=1)
+    update_result = await client.update_many(
+        model, filter_kwargs={"id": 1}, id=2
+    )
+    assert update_result.raw_result == {}
+
+    # Test whether it correctly handles filter by non-id
+    update_result = await client.update_many(
+        model, filter_kwargs={"field": "value"}, field="value2"
+    )
+    assert update_result.raw_result == {}
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_client.app")
 async def test_get():
     client = MongoDBClient()
     model = Model(id=1)

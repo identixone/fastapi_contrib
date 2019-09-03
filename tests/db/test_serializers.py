@@ -132,6 +132,27 @@ async def test_model_serializer_update_one():
     assert result.raw_result == {}
 
 
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+async def test_model_serializer_update_many():
+    class Model(MongoDBTimeStampedModel):
+
+        class Meta:
+            collection = "collection"
+
+    class TestSerializer(ModelSerializer):
+        a = 1
+        c: str
+        d: int = None
+
+        class Meta:
+            model = Model
+
+    serializer = TestSerializer(c="2")
+    result = await serializer.update_many({"a": 1})
+    assert result.raw_result == {}
+
+
 def test_serializer_dict():
     class TestSerializer(Serializer):
         a: int = 1

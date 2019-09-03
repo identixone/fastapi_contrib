@@ -107,3 +107,13 @@ async def test_update_one():
     MongoDBClient._MongoDBClient__instance = None
     result = await Model.update_one(filter_kwargs={"id": 1}, id=2)
     assert result.raw_result == {}
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_models.app")
+async def test_update_many():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+    result = await Model.update_many(filter_kwargs={"id": 1}, id=2)
+    assert result.raw_result == {}
