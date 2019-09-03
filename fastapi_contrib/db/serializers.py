@@ -4,21 +4,31 @@ from typing import Iterable, List
 from pydantic import BaseModel, create_model, Required
 
 
-class Serializer(BaseModel):
+class AbstractMeta(ABC):
+    exclude = ()
+    model = None
+    write_only_fields = ()
 
+
+class Serializer(BaseModel):
     @classmethod
     def sanitize_list(cls, iterable: Iterable) -> List[dict]:
         def clean_d(d):
             for e in cls.Meta.exclude:
-                d.pop(e)
+                d.pop(e, None)
             return d
+
         return list(map(lambda x: clean_d(x), iterable))
 
     async def save(self):
-        instance = self.Meta.model(**self.__values__)
-        await instance.save()
-        self.id = instance.id
-        return instance
+        if (
+            hasattr(self, "Meta")
+            and getattr(self.Meta, "model", None) is not None
+        ):
+            instance = self.Meta.model(**self.__values__)
+            await instance.save()
+            self.id = instance.id
+            return instance
 
     async def update_one(self, filter_kwargs):
         instance = self.Meta.model(**self.__values__)
@@ -26,30 +36,30 @@ class Serializer(BaseModel):
         return instance
 
     def dict(self, *args, **kwargs) -> dict:
-        exclude = kwargs.get('exclude')
+        exclude = kwargs.get("exclude")
         if not exclude:
             exclude = set()
 
         exclude.update({"_id"})
 
-        if hasattr(self.Meta, "exclude"):
+        if hasattr(self.Meta, "exclude") and self.Meta.exclude:
             exclude.update(self.Meta.exclude)
 
-        if hasattr(self.Meta, "write_only_fields"):
+        if (
+            hasattr(self.Meta, "write_only_fields")
+            and self.Meta.write_only_fields
+        ):
             exclude.update(self.Meta.write_only_fields)
 
         kwargs.update({"exclude": exclude})
         original = super().dict(*args, **kwargs)
         return original
 
-
-class AbstractMeta(ABC):
-    exclude = ()
-    model = None
+    class Meta(AbstractMeta):
+        ...
 
 
 class ModelSerializer(Serializer):
-
     def __new__(cls, *args, **kwargs):
         _fields = {}
 
