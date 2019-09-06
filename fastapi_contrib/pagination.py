@@ -2,7 +2,7 @@ import asyncio
 
 from starlette.requests import Request
 
-from fastapi_contrib.db.serializers import Serializer
+from fastapi_contrib.serializers.common import Serializer
 
 
 class Pagination(object):

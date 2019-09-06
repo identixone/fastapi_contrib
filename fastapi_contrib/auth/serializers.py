@@ -1,5 +1,5 @@
 from fastapi_contrib.auth.models import Token
-from fastapi_contrib.db.serializers import ModelSerializer
+from fastapi_contrib.serializers.common import ModelSerializer
 
 
 class TokenSerializer(ModelSerializer):

@@ -7,7 +7,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel, ValidationError
 
 from fastapi_contrib.db.models import MongoDBTimeStampedModel
-from fastapi_contrib.db.serializers import Serializer, ModelSerializer
+from fastapi_contrib.serializers import openapi
+from fastapi_contrib.serializers.common import Serializer, ModelSerializer
 from tests.mock import MongoDBMock
 from tests.utils import override_settings
 
@@ -16,6 +17,7 @@ app.mongodb = MongoDBMock()
 
 
 def test_serializer_inheritance_works():
+    @openapi.patch
     class TestSerializer(Serializer):
         a = 1
 
@@ -32,6 +34,7 @@ def test_model_serializer_inheritance_works():
         e: int = 2
         f: str
 
+    @openapi.patch
     class TestSerializer(ModelSerializer):
         a = 1
         c: str
@@ -62,6 +65,7 @@ def test_model_serializer_inheritance_works():
 
 
 def test_sanitize_list_serializer():
+    @openapi.patch
     class TestSerializer(Serializer):
         a: int = 1
 
@@ -69,11 +73,12 @@ def test_sanitize_list_serializer():
     sanitized_data = TestSerializer.sanitize_list(data)
     assert data == sanitized_data
 
+    @openapi.patch
     class TestSerializer(Serializer):
         a: int = 1
 
         class Meta:
-            exclude = ("b", "c")
+            exclude: set = {"b", "c"}
 
     data = [{"a": 1, "b": 2}, {"b": 2}, {"c": 3}]
     sanitized_data = TestSerializer.sanitize_list(data)
@@ -82,6 +87,7 @@ def test_sanitize_list_serializer():
 
 @pytest.mark.asyncio
 async def test_serializer_save():
+    @openapi.patch
     class TestSerializer(Serializer):
         a: int = 1
 
@@ -98,6 +104,7 @@ async def test_model_serializer_save():
         class Meta:
             collection = "collection"
 
+    @openapi.patch
     class TestSerializer(ModelSerializer):
         a = 1
         c: str
@@ -108,7 +115,7 @@ async def test_model_serializer_save():
 
     serializer = TestSerializer(c="2")
     instance = await serializer.save()
-    assert instance.id == serializer.id
+    assert instance.id == 1
 
 
 @pytest.mark.asyncio
@@ -119,6 +126,7 @@ async def test_model_serializer_update_one():
         class Meta:
             collection = "collection"
 
+    @openapi.patch
     class TestSerializer(ModelSerializer):
         a = 1
         c: str
@@ -140,6 +148,7 @@ async def test_model_serializer_update_many():
         class Meta:
             collection = "collection"
 
+    @openapi.patch
     class TestSerializer(ModelSerializer):
         a = 1
         c: str
@@ -154,6 +163,7 @@ async def test_model_serializer_update_many():
 
 
 def test_serializer_dict():
+    @openapi.patch
     class TestSerializer(Serializer):
         a: int = 1
 
@@ -161,12 +171,13 @@ def test_serializer_dict():
     _dict = serializer.dict()
     assert _dict == {"a": 1}
 
+    @openapi.patch
     class TestSerializer(Serializer):
         a: int = 1
         b: str
 
         class Meta:
-            exclude = ("a",)
+            exclude: set = {"a"}
 
     serializer = TestSerializer(b="b")
     _dict = serializer.dict()
@@ -177,14 +188,15 @@ def test_serializer_dict():
 
 
 def test_model_serializer_dict():
+    @openapi.patch
     class TestSerializer(ModelSerializer):
         a = 1
         c: str
         d: int = None
 
         class Meta:
-            write_only_fields = ("c",)
-            exclude = ("d",)
+            write_only_fields: set = {"c"}
+            exclude: set = {"d"}
 
     serializer = TestSerializer(c="2")
     _dict = serializer.dict()

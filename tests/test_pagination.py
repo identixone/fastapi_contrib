@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from starlette.requests import Request
 
 from fastapi_contrib.db.models import MongoDBTimeStampedModel
-from fastapi_contrib.db.serializers import ModelSerializer
+from fastapi_contrib.serializers.common import ModelSerializer
 from fastapi_contrib.pagination import Pagination
 
 from tests.mock import MongoDBMock

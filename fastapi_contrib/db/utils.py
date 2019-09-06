@@ -13,9 +13,10 @@ from fastapi_contrib.conf import settings
 
 def default_id_generator():
     """
-    :return: 64-bit int ID
+    TODO: there were some problems with 64-bit ints, needs investigation
+    :return: 32-bit int ID
     """
-    bit_size = 64
+    bit_size = 32
     return random.getrandbits(bit_size)
 
 
