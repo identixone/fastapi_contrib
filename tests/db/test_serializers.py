@@ -5,6 +5,7 @@ import pytest
 from fastapi import FastAPI
 
 from pydantic import BaseModel, ValidationError
+from starlette.testclient import TestClient
 
 from fastapi_contrib.db.models import MongoDBTimeStampedModel
 from fastapi_contrib.serializers import openapi
@@ -13,7 +14,35 @@ from tests.mock import MongoDBMock
 from tests.utils import override_settings
 
 app = FastAPI()
-app.mongodb = MongoDBMock()
+
+app.mongodb = MongoDBMock(inserted_id=3)
+
+
+class RouteTestModel(MongoDBTimeStampedModel):
+    c: str
+
+    class Meta:
+        collection = "collection"
+
+
+@openapi.patch
+class RouteTestSerializer(ModelSerializer):
+    a: int = 1
+    d: int = None
+
+    class Meta:
+        model = RouteTestModel
+        read_only_fields = {"id"}
+        write_only_fields = {"c"}
+
+
+@app.post(
+    "/test/",
+    response_model=RouteTestSerializer.response_model
+)
+async def routetester(serializer: RouteTestSerializer) -> dict:
+    instance = await serializer.save()
+    return instance.dict()
 
 
 def test_serializer_inheritance_works():
@@ -114,8 +143,8 @@ async def test_model_serializer_save():
             model = Model
 
     serializer = TestSerializer(c="2")
-    instance = await serializer.save()
-    assert instance.id == 1
+    result = await serializer.update_one({"a": 1})
+    assert result.raw_result == {}
 
 
 @pytest.mark.asyncio
@@ -136,12 +165,27 @@ async def test_model_serializer_update_one():
             model = Model
 
     serializer = TestSerializer(c="2")
-    result = await serializer.update_one({"a": 1})
-    assert result.raw_result == {}
+    instance = await serializer.save()
+    assert instance.id == 1
+
+
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+def test_model_serializer_in_route():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
+    test_client = TestClient(app)
+    response = test_client.post("/test/", json={"c": "cc", "id": 123})
+
+    assert response.status_code == 200
+    response = response.json()
+    assert response["id"] == 3
+    assert "c" not in response.keys()
 
 
 @pytest.mark.asyncio
-@override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_model_serializer_update_many():
     class Model(MongoDBTimeStampedModel):
 

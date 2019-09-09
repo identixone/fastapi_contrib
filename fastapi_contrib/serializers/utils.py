@@ -18,10 +18,9 @@ def gen_model(cls, mode: FieldGenerationMode):
 
     Config = getattr(cls, "Config", getattr(Serializer, "Config"))
 
-    excluded = Meta.exclude
     if mode == FieldGenerationMode.RESPONSE:
         excluded = Meta.exclude | Meta.write_only_fields
-    elif mode == FieldGenerationMode.REQUEST:
+    else:
         excluded = Meta.exclude | Meta.read_only_fields
 
     if hasattr(Meta, "model") and Meta.model is not None:

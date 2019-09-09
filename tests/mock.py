@@ -1,5 +1,3 @@
-from motor.motor_asyncio import AsyncIOMotorCursor
-from pymongo.cursor import Cursor
 from pymongo.results import InsertOneResult, DeleteResult, UpdateResult
 from unittest.mock import MagicMock
 
@@ -14,10 +12,12 @@ class MongoDBCollectionMock(MagicMock):
     def __init__(self, **kwargs):
         super().__init__()
         find_one_result = kwargs.get('find_one_result', {"_id": 1})
+        inserted_id = kwargs.get('inserted_id', 1)
         create_indexes_result = kwargs.get('create_indexes_result', None)
 
         self.insert_one = AsyncMock(
-            return_value=InsertOneResult(inserted_id=1, acknowledged=True)
+            return_value=InsertOneResult(
+                inserted_id=inserted_id, acknowledged=True)
         )
         self.delete_many = AsyncMock(
             return_value=DeleteResult(raw_result={}, acknowledged=True)
