@@ -1,5 +1,3 @@
-import logging
-
 from pydantic import BaseSettings
 from typing import List
 
@@ -7,7 +5,7 @@ __all__ = ["settings"]
 
 
 class Settings(BaseSettings):
-    logger = logging.getLogger()
+    logger: str = "logging"
     debug_timing: bool = False
     request_id_header: str = "Request-ID"
 

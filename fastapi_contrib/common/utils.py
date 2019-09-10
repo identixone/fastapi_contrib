@@ -5,7 +5,7 @@ from time import time
 
 from fastapi_contrib.conf import settings
 
-logger = settings.logger
+logger = importlib.import_module(settings.logger)
 
 
 def resolve_dotted_path(path: str):
