@@ -1,4 +1,5 @@
 import importlib
+import sys
 
 from functools import wraps
 from time import time
@@ -16,6 +17,21 @@ def resolve_dotted_path(path: str):
 
 
 logger = resolve_dotted_path(settings.logger)
+
+logger_config = {
+    "handlers": [
+        {
+            "sink": sys.stdout,
+            "level": settings.log_level,
+            "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:"
+            "<cyan>{line}</cyan> -"
+            " <level>{message}</level>",
+        }
+    ]
+}
+logger.configure(**logger_config)
 
 
 def get_current_app():

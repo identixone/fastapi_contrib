@@ -6,6 +6,7 @@ __all__ = ["settings"]
 
 class Settings(BaseSettings):
     logger: str = "logging"
+    log_level: str = "INFO"
     debug_timing: bool = False
     request_id_header: str = "Request-ID"
 
