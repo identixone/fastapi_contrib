@@ -5,14 +5,17 @@ from time import time
 
 from fastapi_contrib.conf import settings
 
-logger = importlib.import_module(settings.logger)
-
 
 def resolve_dotted_path(path: str):
     splitted = path.split(".")
+    if len(splitted) <= 1:
+        return importlib.import_module(path)
     module, attr = ".".join(splitted[:-1]), splitted[-1]
     module = importlib.import_module(module)
     return getattr(module, attr)
+
+
+logger = resolve_dotted_path(settings.logger)
 
 
 def get_current_app():
