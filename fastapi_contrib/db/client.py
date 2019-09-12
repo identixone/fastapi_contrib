@@ -1,3 +1,4 @@
+from pymongo.client_session import ClientSession
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from pymongo.results import InsertOneResult, DeleteResult, UpdateResult
@@ -24,7 +25,11 @@ class MongoDBClient(object):
         return getattr(self.mongodb, collection_name)
 
     async def insert(
-        self, model: MongoDBModel, session=None, include=None, exclude=None
+        self,
+        model: MongoDBModel,
+        session: ClientSession = None,
+        include=None,
+        exclude=None,
     ) -> InsertOneResult:
         data = model.dict(include=include, exclude=exclude)
         data["_id"] = data.pop("id")
@@ -32,7 +37,9 @@ class MongoDBClient(object):
         collection = self.get_collection(collection_name)
         return await collection.insert_one(data, session=session)
 
-    async def count(self, model: MongoDBModel, session=None, **kwargs) -> int:
+    async def count(
+        self, model: MongoDBModel, session: ClientSession = None, **kwargs
+    ) -> int:
         _id = kwargs.pop("id", None)
         if _id is not None:
             kwargs["_id"] = _id
@@ -43,7 +50,7 @@ class MongoDBClient(object):
         return res
 
     async def delete(
-        self, model: MongoDBModel, session=None, **kwargs
+        self, model: MongoDBModel, session: ClientSession = None, **kwargs
     ) -> DeleteResult:
         _id = kwargs.pop("id", None)
         if _id is not None:
@@ -55,7 +62,11 @@ class MongoDBClient(object):
         return res
 
     async def update_one(
-        self, model: MongoDBModel, filter_kwargs: dict, session=None, **kwargs
+        self,
+        model: MongoDBModel,
+        filter_kwargs: dict,
+        session: ClientSession = None,
+        **kwargs
     ) -> UpdateResult:
         _id = filter_kwargs.pop("id", None)
         if _id is not None:
@@ -69,7 +80,11 @@ class MongoDBClient(object):
         return res
 
     async def update_many(
-        self, model: MongoDBModel, filter_kwargs: dict, session=None, **kwargs
+        self,
+        model: MongoDBModel,
+        filter_kwargs: dict,
+        session: ClientSession = None,
+        **kwargs
     ) -> UpdateResult:
         _id = filter_kwargs.pop("id", None)
         if _id is not None:
@@ -82,7 +97,9 @@ class MongoDBClient(object):
         )
         return res
 
-    async def get(self, model: MongoDBModel, session=None, **kwargs) -> dict:
+    async def get(
+        self, model: MongoDBModel, session: ClientSession = None, **kwargs
+    ) -> dict:
         _id = kwargs.pop("id", None)
         if _id is not None:
             kwargs["_id"] = _id
@@ -93,7 +110,12 @@ class MongoDBClient(object):
         return res
 
     def list(
-        self, model: MongoDBModel, session=None, _offset=0, _limit=0, **kwargs
+        self,
+        model: MongoDBModel,
+        session: ClientSession = None,
+        _offset: int = 0,
+        _limit: int = 0,
+        **kwargs
     ) -> Cursor:
         _id = kwargs.pop("id", None)
         if _id is not None:

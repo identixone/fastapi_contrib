@@ -3,11 +3,14 @@ import sys
 
 from functools import wraps
 from time import time
+from typing import Any
+
+from fastapi import FastAPI
 
 from fastapi_contrib.conf import settings
 
 
-def resolve_dotted_path(path: str):
+def resolve_dotted_path(path: str) -> Any:
     splitted = path.split(".")
     if len(splitted) <= 1:
         return importlib.import_module(path)
@@ -16,11 +19,11 @@ def resolve_dotted_path(path: str):
     return getattr(module, attr)
 
 
-def get_logger():
-    logger = resolve_dotted_path(settings.logger)
+def get_logger() -> Any:
+    lib_logger = resolve_dotted_path(settings.logger)
 
     # Check whether it is loguru-compatible logger
-    if hasattr(logger, "configure"):
+    if hasattr(lib_logger, "configure"):
         logger_config = {
             "handlers": [
                 {
@@ -34,15 +37,15 @@ def get_logger():
                 }
             ]
         }
-        logger.configure(**logger_config)
+        lib_logger.configure(**logger_config)
 
-    return logger
+    return lib_logger
 
 
 logger = get_logger()
 
 
-def get_current_app():
+def get_current_app() -> FastAPI:
     # TODO: cache this
     app = resolve_dotted_path(settings.fastapi_app)
     return app

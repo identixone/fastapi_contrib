@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Type
 
 from pydantic import Required, create_model
 
@@ -10,7 +11,7 @@ class FieldGenerationMode(int, Enum):
     RESPONSE = 2
 
 
-def gen_model(cls, mode: FieldGenerationMode):
+def gen_model(cls: Type, mode: FieldGenerationMode):
     _fields = {}
 
     _Meta = getattr(cls, "Meta", type("Meta"))

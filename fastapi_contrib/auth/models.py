@@ -22,7 +22,7 @@ class Token(MongoDBTimeStampedModel):
     is_active: bool = True
 
     @validator("key", pre=True, always=True)
-    def set_key(cls, v, values, **kwargs):
+    def set_key(cls, v, values, **kwargs) -> str:
         if v:
             return v
         return generate_token()

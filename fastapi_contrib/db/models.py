@@ -1,10 +1,10 @@
 import copy
 
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from pydantic import validator, BaseModel
-from pymongo.results import UpdateResult
+from pymongo.results import UpdateResult, DeleteResult
 
 from fastapi_contrib.common.utils import async_timing
 from fastapi_contrib.db.utils import get_db_client, get_next_id, get_now
@@ -14,20 +14,19 @@ class MongoDBModel(BaseModel):
     id: int = None
 
     @validator("id", pre=True, always=True)
-    def set_id(cls, v, values, **kwargs):
-        # TODO: read_only_fields
+    def set_id(cls, v, values, **kwargs) -> int:
         if v:
             return v
 
         return get_next_id()
 
     @classmethod
-    def get_db_collection(cls):
+    def get_db_collection(cls) -> str:
         return cls.Meta.collection
 
     @classmethod
     @async_timing
-    async def get(cls, **kwargs):
+    async def get(cls, **kwargs) -> Optional['MongoDBModel']:
         db = get_db_client()
         result = await db.get(cls, **kwargs)
         if not result:
@@ -38,14 +37,14 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def delete(cls, **kwargs):
+    async def delete(cls, **kwargs) -> DeleteResult:
         db = get_db_client()
         result = await db.delete(cls, **kwargs)
         return result
 
     @classmethod
     @async_timing
-    async def count(cls, **kwargs):
+    async def count(cls, **kwargs) -> int:
         db = get_db_client()
         result = await db.count(cls, **kwargs)
         return result
@@ -68,10 +67,11 @@ class MongoDBModel(BaseModel):
         return result
 
     @async_timing
-    async def save(self, include=None, exclude=None):
+    async def save(self, include: set = None, exclude: set = None) -> int:
         db = get_db_client()
         insert_result = await db.insert(self, include=include, exclude=exclude)
         self.id = insert_result.inserted_id
+        return self.id
 
     @classmethod
     @async_timing
@@ -93,7 +93,7 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def create_indexes(cls) -> List[str]:
+    async def create_indexes(cls) -> Optional[List[str]]:
         if hasattr(cls.Meta, "indexes"):
             db = get_db_client()
             collection = db.get_collection(cls.Meta.collection)
@@ -107,7 +107,7 @@ class MongoDBTimeStampedModel(MongoDBModel):
     created: datetime = None
 
     @validator("created", pre=True, always=True)
-    def set_created_now(cls, v):
+    def set_created_now(cls, v: datetime) -> datetime:
         if v:
             return v
         return get_now()

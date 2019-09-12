@@ -1,8 +1,10 @@
 from abc import ABC
-from typing import Iterable, List
+from typing import Iterable, List, Any
 
 from pydantic import BaseModel
 from pymongo.results import UpdateResult
+
+from fastapi_contrib.db.models import MongoDBModel
 
 
 class AbstractMeta(ABC):
@@ -24,7 +26,7 @@ class Serializer(BaseModel):
 
         return list(map(lambda x: clean_d(x), iterable))
 
-    async def save(self):
+    async def save(self) -> MongoDBModel:
         if (
             hasattr(self, "Meta")
             and getattr(self.Meta, "model", None) is not None

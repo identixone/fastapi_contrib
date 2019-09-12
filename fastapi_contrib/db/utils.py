@@ -7,33 +7,33 @@ import random
 from datetime import datetime
 from typing import List
 
+from fastapi import FastAPI
+
 from fastapi_contrib.common.utils import resolve_dotted_path
 from fastapi_contrib.conf import settings
 
 
-def default_id_generator():
+def default_id_generator(bit_size: int = 32) -> int:
     """
-    TODO: there were some problems with 64-bit ints, needs investigation
-    :return: 32-bit int ID
+    :return: `bit_size` long int
     """
-    bit_size = 32
     return random.getrandbits(bit_size)
 
 
-def get_now():
+def get_now() -> datetime:
     # TODO: cache this
     if settings.now_function:
         return resolve_dotted_path(settings.now_function)()
     return datetime.utcnow()
 
 
-def get_next_id():
+def get_next_id() -> int:
     # TODO: cache this
     id_generator = resolve_dotted_path(settings.mongodb_id_generator)
     return id_generator()
 
 
-def setup_mongodb(app):
+def setup_mongodb(app: FastAPI) -> None:
     client = motor.motor_asyncio.AsyncIOMotorClient(settings.mongodb_dsn)
     app.mongodb = client[settings.mongodb_dbname]
 

@@ -4,7 +4,7 @@
 import pytest
 
 from asyncio import Future
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from fastapi import FastAPI
 
