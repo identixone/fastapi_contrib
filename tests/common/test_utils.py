@@ -4,16 +4,30 @@
 import pytest
 
 from asyncio import Future
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from fastapi import FastAPI
 
 from fastapi_contrib.common.utils import async_timing, resolve_dotted_path, \
-    get_current_app
+    get_current_app, get_logger
 from tests.utils import override_settings
 
 
 app = FastAPI()
+plogger = MagicMock()
+plogger.configure = lambda **kwargs: True
+
+
+def test_default_logger():
+    from fastapi_contrib.common.utils import logger
+    assert not hasattr(logger, "configure")
+
+
+@override_settings(logger="tests.common.test_utils.plogger")
+def test_loguru_compatible_logger():
+    logger = get_logger()
+    kwargs = {"a": 1, "b": 2}
+    assert logger.configure(**kwargs)
 
 
 def test_resolve_dotted_path():

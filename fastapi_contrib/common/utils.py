@@ -16,22 +16,30 @@ def resolve_dotted_path(path: str):
     return getattr(module, attr)
 
 
-logger = resolve_dotted_path(settings.logger)
+def get_logger():
+    logger = resolve_dotted_path(settings.logger)
 
-logger_config = {
-    "handlers": [
-        {
-            "sink": sys.stdout,
-            "level": settings.log_level,
-            "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-            "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:"
-            "<cyan>{line}</cyan> -"
-            " <level>{message}</level>",
+    # Check whether it is loguru-compatible logger
+    if hasattr(logger, "configure"):
+        logger_config = {
+            "handlers": [
+                {
+                    "sink": sys.stdout,
+                    "level": settings.log_level,
+                    "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+                    "<level>{level: <8}</level> | "
+                    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:"
+                    "<cyan>{line}</cyan> -"
+                    " <level>{message}</level>",
+                }
+            ]
         }
-    ]
-}
-logger.configure(**logger_config)
+        logger.configure(**logger_config)
+
+    return logger
+
+
+logger = get_logger()
 
 
 def get_current_app():
