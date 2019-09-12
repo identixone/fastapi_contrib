@@ -29,7 +29,7 @@ async def startup():
 
 @app.get(
     "/authed/",
-    dependencies=[Depends(PermissionsDependency([IsAuthenticated]))]
+    dependencies=[Depends(PermissionsDependency([IsAuthenticated]))],
 )
 def authed(request: Request):
     return {"username": request.scope["user"].username}
@@ -54,8 +54,7 @@ def test_has_auth_permission():
 
 
 @patch(
-    "fastapi_contrib.auth.models.User.get",
-    new=AsyncMock(return_value=None),
+    "fastapi_contrib.auth.models.User.get", new=AsyncMock(return_value=None)
 )
 @patch(
     "fastapi_contrib.auth.models.Token.get",
@@ -68,4 +67,8 @@ def test_doesnt_have_auth_permission():
         )
         assert response.status_code == 401
         response = response.json()
-        assert response == {'code': 401, 'detail': 'Not authenticated.', 'fields': []}
+        assert response == {
+            "code": 401,
+            "detail": "Not authenticated.",
+            "fields": [],
+        }

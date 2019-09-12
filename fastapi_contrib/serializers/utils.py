@@ -7,11 +7,22 @@ from fastapi_contrib.serializers.common import AbstractMeta, Serializer
 
 
 class FieldGenerationMode(int, Enum):
+    """
+    Defines modes in which fields of decorated serializer should be generated.
+    """
     REQUEST = 1
     RESPONSE = 2
 
 
 def gen_model(cls: Type, mode: FieldGenerationMode):
+    """
+    Generate `pydantic.BaseModel` based on fields in Serializer class,
+    its Meta class and possible Model class.
+
+    :param cls: serializer class (could be modelserializer or regular one)
+    :param mode: field generation mode
+    :return: newly generated `BaseModel` from fields in Model & Serializer
+    """
     _fields = {}
 
     _Meta = getattr(cls, "Meta", type("Meta"))

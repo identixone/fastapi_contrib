@@ -126,6 +126,28 @@ async def test_serializer_save():
 
 
 @pytest.mark.asyncio
+async def test_serializer_update_one():
+    @openapi.patch
+    class TestSerializer(Serializer):
+        a: int = 1
+
+    serializer = TestSerializer()
+    await serializer.update_one(filter_kwargs={"id": 1})
+    assert not hasattr(serializer, "id")
+
+
+@pytest.mark.asyncio
+async def test_serializer_update_many():
+    @openapi.patch
+    class TestSerializer(Serializer):
+        a: int = 1
+
+    serializer = TestSerializer()
+    await serializer.update_many(filter_kwargs={"id": 1})
+    assert not hasattr(serializer, "id")
+
+
+@pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_model_serializer_save():
     class Model(MongoDBTimeStampedModel):

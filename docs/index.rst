@@ -1,5 +1,5 @@
 Welcome to FastAPI Contrib's documentation!
-======================================
+===========================================
 
 .. toctree::
    :maxdepth: 2

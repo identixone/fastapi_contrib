@@ -7,6 +7,24 @@ from fastapi_contrib.exceptions import HTTPException
 
 
 class BasePermission(ABC):
+    """
+    Abstract permission that all other Permissions must be inherited from.
+
+    Defines basic error message, status & error codes.
+
+    Upon initialization, calls abstract method  `has_required_permisions`
+    which will be specific to concrete implementation of Permission class.
+
+    You would write your permissions like this:
+
+    .. code-block:: python
+
+        class TeapotUserAgentPermission(BasePermission):
+
+            def has_required_permisions(self, request: Request) -> bool:
+                return request.headers.get('User-Agent') == "Teapot v1.0"
+
+    """
     error_msg = "Forbidden."
     status_code = status.HTTP_403_FORBIDDEN
     error_code = status.HTTP_403_FORBIDDEN
@@ -25,6 +43,24 @@ class BasePermission(ABC):
 
 
 class PermissionsDependency(object):
+    """
+    Permission dependency that is used to define and check all the permission
+    classes from one place inside route definition.
+
+    Use it as an argument to FastAPI's `Depends` as follows:
+
+    .. code-block:: python
+
+        app = FastAPI()
+
+        @app.get(
+            "/teapot/",
+            dependencies=[Depends(
+                PermissionsDependency([TeapotUserAgentPermission]))]
+        )
+        async def teapot() -> dict:
+            return {"teapot": True}
+    """
 
     def __init__(self, permissions_classes: list):
         self.permissions_classes = permissions_classes

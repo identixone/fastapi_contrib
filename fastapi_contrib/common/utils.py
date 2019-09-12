@@ -11,6 +11,18 @@ from fastapi_contrib.conf import settings
 
 
 def resolve_dotted_path(path: str) -> Any:
+    """
+    Retrieves attribute (var, function, class, etc.) from module by dotted path.
+
+    .. code-block:: python
+
+        from datetime.datetime import utcnow as default_utcnow
+        utcnow = resolve_dotted_path('datetime.datetime.utcnow')
+        assert utcnow == default_utcnow
+
+    :param path: dotted path to the attribute in module
+    :return: desired attribute or None
+    """
     splitted = path.split(".")
     if len(splitted) <= 1:
         return importlib.import_module(path)
@@ -20,6 +32,13 @@ def resolve_dotted_path(path: str) -> Any:
 
 
 def get_logger() -> Any:
+    """
+    Gets logger that will be used throughout this whole library.
+    First it finds and imports the logger, then if it can be configured
+    using loguru-compatible config, it does so.
+
+    :return: desired logger (pre-configured if loguru)
+    """
     lib_logger = resolve_dotted_path(settings.logger)
 
     # Check whether it is loguru-compatible logger
@@ -46,12 +65,23 @@ logger = get_logger()
 
 
 def get_current_app() -> FastAPI:
+    """
+    Retrieves FastAPI app instance from the path, specified in project's conf.
+    :return: FastAPI app
+    """
     # TODO: cache this
     app = resolve_dotted_path(settings.fastapi_app)
     return app
 
 
 def async_timing(func):
+    """
+    Decorator for logging timing of async functions.
+    Used in this library internally for tracking DB functions performance.
+
+    :param func: function to be decorated
+    :return: wrapped function
+    """
     @wraps(func)
     async def wrap(*args, **kwargs):
         time1 = time()

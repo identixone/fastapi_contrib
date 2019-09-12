@@ -9,7 +9,12 @@ from fastapi_contrib.common.utils import get_current_app
 
 class MongoDBClient(object):
     """
-    Singleton. TODO: Singleton base (abc?) class
+    Singleton client for interacting with MongoDB.
+    Operates mostly using models, specified when making DB queries.
+
+    Implements only part of internal `motor` methods, but can be populated more.
+
+    Please don't use it directly, use `fastapi_contrib.db.utils.get_db_client`.
     """
 
     __instance = None

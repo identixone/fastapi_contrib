@@ -151,4 +151,4 @@ async def test_list():
 
     # Test whether it correctly handles filter by non-id
     _dict = client.list(model, field="value")
-    assert cursor
+    assert _dict
