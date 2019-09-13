@@ -1,4 +1,5 @@
 * FastAPI Contrib version:
+* FastAPI version:
 * Python version:
 * Operating System:
 
