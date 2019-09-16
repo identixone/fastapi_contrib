@@ -9,7 +9,7 @@ from typing import List
 
 from fastapi import FastAPI
 
-from fastapi_contrib.common.utils import resolve_dotted_path
+from fastapi_contrib.common.utils import logger, resolve_dotted_path
 from fastapi_contrib.conf import settings
 
 
@@ -76,8 +76,8 @@ def get_db_client():
 
 def get_models() -> list:
     """
-    Scans `settings.apps_folder_name`, relative to `settings.project_root`.
-    Find `models` module in each of them and searches for any attributes there.
+    Scans `settings.apps_folder_name`.
+    Find `models` modules in each of them and get all attributes there.
     Last step is to filter attributes to return only those,
     subclassed from MongoDBModel (or timestamped version).
 
@@ -88,17 +88,18 @@ def get_models() -> list:
     from fastapi_contrib.db.models import MongoDBModel
 
     apps_folder_name = settings.apps_folder_name
-    path = settings.project_root
     models = []
     for app in settings.apps:
-        modules = [f[1] for f in pkgutil.walk_packages(path=[f"{path}/{app}"])]
+        app_path = f"{apps_folder_name}/{app}"
+        modules = [f[1] for f in pkgutil.walk_packages(path=[app_path])]
         if "models" in modules:
+            path_to_models = f"{apps_folder_name}.{app}.models"
             try:
-                module_models = pyclbr.readmodule(
-                    f"{apps_folder_name}.{app}.models"
-                ).keys()
-            except AttributeError:
-                # TODO: print warning or something
+                module_models = pyclbr.readmodule(path_to_models).keys()
+            except (AttributeError, ImportError):
+                logger.warning(
+                    f"Unable to read module attributes in {path_to_models}"
+                )
                 continue
             mudule = importlib.import_module(
                 f"{apps_folder_name}.{app}.models"

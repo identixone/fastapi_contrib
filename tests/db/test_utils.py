@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from unittest.mock import patch
 
 import pytest
 import random
@@ -27,9 +28,8 @@ app.mongodb = MongoDBMock(
 
 
 def test_default_id_generator():
-    # TODO: sometimes bit_length tells that _id is 63 bits long
     _id = default_id_generator()
-    assert _id.bit_length() <= 64
+    assert _id.bit_length() <= 32
 
 
 def test_get_now():
@@ -66,14 +66,20 @@ def test_setup_mongodb():
     assert isinstance(_app.mongodb, AsyncIOMotorDatabase)
 
 
-@override_settings(project_root="fastapi_contrib")
 @override_settings(apps_folder_name="fastapi_contrib")
 @override_settings(apps=["auth"])
 def test_get_models():
     assert get_models() == [User, Token]
 
 
-@override_settings(project_root="fastapi_contrib")
+@override_settings(apps_folder_name="fastapi_contrib")
+@override_settings(apps=["auth"])
+@patch("pyclbr.readmodule")
+def test_get_models_with_error_in_importing(mock_pyclbr):
+    mock_pyclbr.side_effect = AttributeError()
+    assert get_models() == []
+
+
 @override_settings(apps_folder_name="apps")
 @override_settings(apps=["auth"])
 def test_get_models_not_found_apps_dir():
@@ -81,14 +87,12 @@ def test_get_models_not_found_apps_dir():
     assert get_models() == []
 
 
-@override_settings(project_root="fastapi_contrib")
 @override_settings(apps_folder_name="fastapi_contrib")
 @override_settings(apps=["common"])
 def test_get_models_from_apps_without_models_module():
     assert get_models() == []
 
 
-@override_settings(project_root="fastapi_contrib")
 @override_settings(apps_folder_name="fastapi_contrib")
 @override_settings(apps=[])
 def test_get_models_from_empty_app_list():
@@ -98,7 +102,6 @@ def test_get_models_from_empty_app_list():
 @pytest.mark.asyncio
 @override_settings(
     fastapi_app="tests.db.test_utils.app",
-    project_root="fastapi_contrib",
     apps_folder_name="fastapi_contrib",
     apps=["auth"]
 )

@@ -24,7 +24,6 @@ class Settings(BaseSettings):
                          assigning `created` field for MongoDB records.
                          Should be used throughout the code for consistency.
     :param fastapi_app: Dotted path to the instance of `FastAPI` main app.
-    :param project_root: Unix path (with slashes) to the root dir of a project.
     :param user_model: Dotted path to the class, which will be used
                        as the main user model in a project.
     :param token_model: Dotted path to the class, which will be used
@@ -48,8 +47,6 @@ class Settings(BaseSettings):
     now_function: str = None  # "pytz.now" or any other custom function path
 
     fastapi_app: str = None  # e.g. "project.server.app", where app = FastAPI()
-
-    project_root: str = None  # apps/ should be inside dir
 
     user_model: str = "fastapi_contrib.auth.models.User"
     token_model: str = "fastapi_contrib.auth.models.Token"
