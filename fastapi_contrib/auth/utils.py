@@ -3,10 +3,9 @@ import os
 
 from fastapi_contrib.common.utils import resolve_dotted_path
 from fastapi_contrib.conf import settings
-from fastapi_contrib.db.models import MongoDBModel
 
 
-def get_token_model() -> MongoDBModel:
+def get_token_model():
     """
     Gets token model class based on project settings.
     :return: Token (defualt or custom) model class
@@ -14,7 +13,7 @@ def get_token_model() -> MongoDBModel:
     return resolve_dotted_path(settings.token_model)
 
 
-def get_user_model() -> MongoDBModel:
+def get_user_model():
     """
     Gets user model class based on project settings.
     :return: User (defualt or custom) model class

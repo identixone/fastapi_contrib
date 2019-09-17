@@ -4,11 +4,11 @@ from unittest.mock import MagicMock
 
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi_contrib.exceptions import HTTPException
 from starlette.testclient import TestClient
 
-from fastapi_contrib.exception_handlers import setup_exception_handlers, \
-    parse_raw_error
+from fastapi_contrib.exception_handlers import (
+    setup_exception_handlers, parse_raw_error)
 
 app = FastAPI()
 
@@ -20,7 +20,12 @@ async def startup():
 
 @app.get("/starlette/exception/")
 async def starlette_exception():
-    raise StarletteHTTPException(status_code=400, detail="required")
+    raise HTTPException(
+        status_code=400,
+        detail="required",
+        fields=[{"field": "value"}],
+        error_code=400
+    )
 
 
 @app.post("/pydantic/exception/")
@@ -53,7 +58,7 @@ def test_exception_handler_starlettehttpexception_custom():
         assert response.status_code == 400
         response = response.json()
         assert response["code"] == 400
-        assert response["fields"] == []
+        assert response["fields"] == [{'field': 'value'}]
 
 
 def test_exception_handler_pydantic_validationerror():

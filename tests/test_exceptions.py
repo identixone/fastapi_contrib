@@ -4,7 +4,8 @@
 import pytest
 
 from fastapi_contrib.exceptions import (
-    HTTPException, BadRequestError, ForbiddenError, NotFoundError)
+    HTTPException, BadRequestError, ForbiddenError, NotFoundError,
+    UnauthorizedError)
 
 from starlette import status
 
@@ -15,14 +16,17 @@ def test_http_exception():
     error_code = 999
     with pytest.raises(HTTPException) as excinfo:
         raise HTTPException(
-            status_code=status_code, error_code=error_code,
-            detail=detail
+            status_code=status_code,
+            error_code=error_code,
+            detail=detail,
+            fields=[{"field": "because of this."}],
         )
 
     exc = excinfo.value
     assert exc.error_code == error_code
     assert exc.detail == detail
     assert exc.status_code == status_code
+    assert exc.fields == [{"field": "because of this."}]
 
 
 def test_bad_request_exception():
@@ -38,6 +42,35 @@ def test_bad_request_exception():
     assert exc.error_code == error_code
     assert exc.detail == detail
     assert exc.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_unauthorized_exception():
+    detail = "I don't know who you are, stranger."
+    with pytest.raises(UnauthorizedError) as excinfo:
+        raise UnauthorizedError(
+            fields=[{"field": "because of this."}],
+            detail=detail
+        )
+
+    exc = excinfo.value
+    assert exc.error_code == status.HTTP_401_UNAUTHORIZED
+    assert exc.status_code == status.HTTP_401_UNAUTHORIZED
+    assert exc.detail == detail
+    assert exc.fields == [{"field": "because of this."}]
+
+    error_code = 444
+    with pytest.raises(UnauthorizedError) as excinfo:
+        raise UnauthorizedError(
+            fields=[{"field": "because of this."}],
+            detail=detail,
+            error_code=error_code
+        )
+
+    exc = excinfo.value
+    assert exc.error_code == error_code
+    assert exc.status_code == status.HTTP_401_UNAUTHORIZED
+    assert exc.detail == detail
+    assert exc.fields == [{"field": "because of this."}]
 
 
 def test_forbidden_exception():

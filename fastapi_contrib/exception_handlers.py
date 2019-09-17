@@ -57,11 +57,11 @@ async def http_exception_handler(
     :param exc: StarletteHTTPException instance
     :return: UJSONResponse with newly formatted error data
     """
-    raw_errors = getattr(exc, "raw_errors", [])
+    fields = getattr(exc, "fields", [])
     data = {
         "code": getattr(exc, "error_code", exc.status_code),
         "detail": getattr(exc, "message", exc.detail),
-        "fields": raw_errors_to_fields(raw_errors),
+        "fields": fields,
     }
     return UJSONResponse(data, status_code=exc.status_code)
 
