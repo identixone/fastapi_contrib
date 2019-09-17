@@ -44,7 +44,8 @@ class Settings(BaseSettings):
     mongodb_dbname: str = "default"
     mongodb_id_generator: str = "fastapi_contrib.db.utils.default_id_generator"
 
-    now_function: str = None  # "pytz.now" or any other custom function path
+    now_function: str = None
+    TZ: str = "UTC"
 
     fastapi_app: str = None  # e.g. "project.server.app", where app = FastAPI()
 

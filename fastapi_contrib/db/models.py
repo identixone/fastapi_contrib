@@ -6,8 +6,8 @@ from typing import List, Optional
 from pydantic import validator, BaseModel
 from pymongo.results import UpdateResult, DeleteResult
 
-from fastapi_contrib.common.utils import async_timing
-from fastapi_contrib.db.utils import get_db_client, get_next_id, get_now
+from fastapi_contrib.common.utils import async_timing, get_now
+from fastapi_contrib.db.utils import get_db_client, get_next_id
 
 
 class MongoDBModel(BaseModel):

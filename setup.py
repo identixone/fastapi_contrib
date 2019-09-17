@@ -11,7 +11,9 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["motor>=2.0.0", "fastapi>=0.35.0", "ujson>=1.35"]
+requirements = [
+    "motor>=2.0.0", "fastapi>=0.35.0", "ujson>=1.35", "pytz"
+]
 
 setup_requirements = ["pytest-runner"]
 

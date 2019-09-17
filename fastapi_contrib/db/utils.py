@@ -4,7 +4,6 @@ import pkgutil
 import pyclbr
 import random
 
-from datetime import datetime
 from typing import List
 
 from fastapi import FastAPI
@@ -20,17 +19,6 @@ def default_id_generator(bit_size: int = 32) -> int:
     :return: `bit_size` long int
     """
     return random.getrandbits(bit_size)
-
-
-def get_now() -> datetime:
-    """
-    Retrieves `now` function from the path, specified in project's conf.
-    :return: datetime of "now"
-    """
-    # TODO: cache this
-    if settings.now_function:
-        return resolve_dotted_path(settings.now_function)()
-    return datetime.utcnow()
 
 
 def get_next_id() -> int:

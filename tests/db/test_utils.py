@@ -6,18 +6,20 @@ import pytest
 import random
 
 from datetime import datetime
+
+import pytz
 from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from fastapi_contrib.auth.models import User, Token
 from fastapi_contrib.db.utils import (
     default_id_generator,
-    get_now,
     get_next_id,
     setup_mongodb,
     get_models,
     create_indexes,
 )
+from fastapi_contrib.common.utils import get_now
 from tests.mock import MongoDBMock
 from tests.utils import override_settings
 
@@ -34,7 +36,8 @@ def test_default_id_generator():
 
 def test_get_now():
     _now = get_now()
-    assert datetime.utcnow() >= _now
+    # import pdb;pdb.set_trace()
+    assert datetime.now(tz=pytz.UTC) >= _now
 
 
 def custom_get_now():

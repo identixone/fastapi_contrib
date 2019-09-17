@@ -9,8 +9,9 @@ class MongoDBCollectionMock(MagicMock):
     codec_options = None
     read_concern = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, collection_name, **kwargs):
         super().__init__()
+        self.name = collection_name
         find_one_result = kwargs.get('find_one_result', {"_id": 1})
         inserted_id = kwargs.get('inserted_id', 1)
         create_indexes_result = kwargs.get('create_indexes_result', None)
@@ -40,5 +41,6 @@ class MongoDBMock(MagicMock):
 
     def __init__(self, collection_name="collection", **kwargs):
         super().__init__()
-        collection_mock = MongoDBCollectionMock(**kwargs)
-        setattr(self, collection_name, collection_mock)
+        collection_mock = MongoDBCollectionMock(
+            collection_name=collection_name, **kwargs)
+        self.get_collection = MagicMock(return_value=collection_mock)

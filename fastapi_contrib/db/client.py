@@ -1,10 +1,11 @@
+from bson import CodecOptions
 from pymongo.client_session import ClientSession
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from pymongo.results import InsertOneResult, DeleteResult, UpdateResult
 
 from fastapi_contrib.db.models import MongoDBModel
-from fastapi_contrib.common.utils import get_current_app
+from fastapi_contrib.common.utils import get_current_app, get_timezone
 
 
 class MongoDBClient(object):
@@ -23,11 +24,15 @@ class MongoDBClient(object):
         if cls.__instance is None:
             cls.__instance = object.__new__(cls)
             app = get_current_app()
+            tzinfo = get_timezone()
+            cls.__instance.codec_options = CodecOptions(
+                tz_aware=True, tzinfo=tzinfo)
             cls.__instance.mongodb = app.mongodb
         return cls.__instance
 
     def get_collection(self, collection_name: str) -> Collection:
-        return getattr(self.mongodb, collection_name)
+        return self.mongodb.get_collection(
+            collection_name, codec_options=self.codec_options)
 
     async def insert(
         self,
