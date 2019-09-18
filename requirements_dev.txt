@@ -8,7 +8,7 @@ twine==1.15.0
 motor>=2.0.0
 fastapi>=0.35.0
 ujson>=1.35
-pytz
+pytz==2019.2
 
 coverage==4.5.4
 flake8==3.7.8
