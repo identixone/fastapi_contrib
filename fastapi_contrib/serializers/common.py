@@ -110,7 +110,7 @@ class Serializer(BaseModel):
             await instance.save()
             return instance
 
-    async def update_one(self, filter_kwargs) -> UpdateResult:
+    async def update_one(self, filter_kwargs, skip_default=True) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -122,9 +122,9 @@ class Serializer(BaseModel):
             and getattr(self.Meta, "model", None) is not None
         ):
             return await self.Meta.model.update_one(
-                filter_kwargs=filter_kwargs, **self.dict())
+                filter_kwargs=filter_kwargs, **self.dict(skip_default=skip_default))
 
-    async def update_many(self, filter_kwargs) -> UpdateResult:
+    async def update_many(self, filter_kwargs, skip_default=True) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -136,7 +136,7 @@ class Serializer(BaseModel):
             and getattr(self.Meta, "model", None) is not None
         ):
             return await self.Meta.model.update_many(
-                filter_kwargs=filter_kwargs, **self.dict())
+                filter_kwargs=filter_kwargs, **self.dict(skip_default=skip_default))
 
     def dict(self, *args, **kwargs) -> dict:
         """
