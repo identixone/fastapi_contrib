@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import asyncio
 
 import pytest
 from fastapi import FastAPI
@@ -12,6 +13,7 @@ from fastapi_contrib.serializers import openapi
 from fastapi_contrib.serializers.common import Serializer, ModelSerializer
 from tests.mock import MongoDBMock
 from tests.utils import override_settings
+import asynctest
 
 app = FastAPI()
 
@@ -189,6 +191,41 @@ async def test_model_serializer_update_one():
     serializer = TestSerializer(c="2")
     instance = await serializer.save()
     assert instance.id == 1
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+# @asynctest.patch('fastapi_contrib.db.models.MongoDBTimeStampedModel.update_one')
+async def test_models_serializer_update_skip_defaults():
+    with asynctest.patch('fastapi_contrib.db.models.MongoDBModel.update_one') as mock_update:
+        mock_update.return_value = asyncio.Future()
+        mock_update.return_value.set_result([])
+
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        @openapi.patch
+        class TestSerializer(ModelSerializer):
+            a = 1
+            c: str
+            d: int = None
+
+            class Meta:
+                model = Model
+
+
+        serializer = TestSerializer(c="2")
+
+        await serializer.update_one({'id': 1})
+
+        assert mock_update.assert_called_with(c='2', filter_kwargs={'id': 1}) is None
+
+        await serializer.update_one({'id': 1}, skip_defaults=False)
+
+        assert mock_update.assert_called_with(c='2', a=1, d=None,
+                                              created=None, filter_kwargs={'id': 1}, id=None) is None
 
 
 @override_settings(fastapi_app="tests.db.test_serializers.app")
