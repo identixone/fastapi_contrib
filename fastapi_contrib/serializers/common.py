@@ -136,7 +136,7 @@ class Serializer(BaseModel):
             and getattr(self.Meta, "model", None) is not None
         ):
             return await self.Meta.model.update_many(
-                filter_kwargs=filter_kwargs, **self.dict(skip_default=skip_defaults))
+                filter_kwargs=filter_kwargs, **self.dict(skip_defaults=skip_defaults))
 
     def dict(self, *args, **kwargs) -> dict:
         """
