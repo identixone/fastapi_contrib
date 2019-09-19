@@ -12,6 +12,8 @@ from fastapi_contrib.serializers import openapi
 from fastapi_contrib.serializers.common import Serializer, ModelSerializer
 from tests.mock import MongoDBMock
 from tests.utils import override_settings
+from unittest.mock import patch
+from tests.utils import AsyncMock
 
 app = FastAPI()
 
@@ -191,6 +193,36 @@ async def test_model_serializer_update_one():
     assert instance.id == 1
 
 
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+async def test_models_serializer_update_one_skip_defaults():
+    with patch('fastapi_contrib.db.models.MongoDBModel.update_one', new_callable=AsyncMock) as mock_update:
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        @openapi.patch
+        class TestSerializer(ModelSerializer):
+            a = 1
+            c: str
+            d: int = None
+
+            class Meta:
+                model = Model
+
+        serializer = TestSerializer(c="2")
+
+        await serializer.update_one({'id': 1})
+
+        mock_update.mock.assert_called_with(c='2', filter_kwargs={'id': 1})
+
+        await serializer.update_one({'id': 1}, skip_defaults=False)
+
+        mock_update.mock.assert_called_with(c='2', a=1, d=None,
+                                            created=None, filter_kwargs={'id': 1}, id=None)
+
+
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 def test_model_serializer_in_route():
     from fastapi_contrib.db.client import MongoDBClient
@@ -226,6 +258,36 @@ async def test_model_serializer_update_many():
     serializer = TestSerializer(c="2")
     result = await serializer.update_many({"a": 1})
     assert result.raw_result == {}
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+async def test_models_serializer_update_many_skip_defaults():
+    with patch('fastapi_contrib.db.models.MongoDBModel.update_many', new_callable=AsyncMock) as mock_update:
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        @openapi.patch
+        class TestSerializer(ModelSerializer):
+            a = 1
+            c: str
+            d: int = None
+
+            class Meta:
+                model = Model
+
+        serializer = TestSerializer(c="2")
+
+        await serializer.update_many({'id': 1})
+
+        mock_update.mock.assert_called_with(c='2', filter_kwargs={'id': 1})
+
+        await serializer.update_many({'id': 1}, skip_defaults=False)
+
+        mock_update.mock.assert_called_with(c='2', a=1, d=None,
+                                            created=None, filter_kwargs={'id': 1}, id=None)
 
 
 def test_serializer_dict():
