@@ -13,6 +13,9 @@ from fastapi_contrib.serializers import openapi
 from fastapi_contrib.serializers.common import Serializer, ModelSerializer
 from tests.mock import MongoDBMock
 from tests.utils import override_settings
+from unittest.mock import patch
+from tests.utils import AsyncMock
+from unittest.mock import MagicMock
 import asynctest
 
 app = FastAPI()
@@ -196,10 +199,7 @@ async def test_model_serializer_update_one():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_models_serializer_update_one_skip_defaults():
-    with asynctest.patch('fastapi_contrib.db.models.MongoDBModel.update_one') as mock_update:
-        mock_update.return_value = asyncio.Future()
-        mock_update.return_value.set_result([])
-
+    with patch('fastapi_contrib.db.models.MongoDBModel.update_one', new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
 
             class Meta:
@@ -218,12 +218,12 @@ async def test_models_serializer_update_one_skip_defaults():
 
         await serializer.update_one({'id': 1})
 
-        assert mock_update.assert_called_with(c='2', filter_kwargs={'id': 1}) is None
+        mock_update.mock.assert_called_with(c='2', filter_kwargs={'id': 1})
 
         await serializer.update_one({'id': 1}, skip_defaults=False)
 
-        assert mock_update.assert_called_with(c='2', a=1, d=None,
-                                              created=None, filter_kwargs={'id': 1}, id=None) is None
+        mock_update.mock.assert_called_with(c='2', a=1, d=None,
+                                            created=None, filter_kwargs={'id': 1}, id=None)
 
 
 @override_settings(fastapi_app="tests.db.test_serializers.app")
@@ -266,10 +266,7 @@ async def test_model_serializer_update_many():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_models_serializer_update_many_skip_defaults():
-    with asynctest.patch('fastapi_contrib.db.models.MongoDBModel.update_many') as mock_update:
-        mock_update.return_value = asyncio.Future()
-        mock_update.return_value.set_result([])
-
+    with asynctest.patch('fastapi_contrib.db.models.MongoDBModel.update_many', new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
 
             class Meta:
@@ -288,12 +285,12 @@ async def test_models_serializer_update_many_skip_defaults():
 
         await serializer.update_many({'id': 1})
 
-        assert mock_update.assert_called_with(c='2', filter_kwargs={'id': 1}) is None
+        mock_update.mock.assert_called_with(c='2', filter_kwargs={'id': 1})
 
         await serializer.update_many({'id': 1}, skip_defaults=False)
 
-        assert mock_update.assert_called_with(c='2', a=1, d=None,
-                                              created=None, filter_kwargs={'id': 1}, id=None) is None
+        mock_update.mock.assert_called_with(c='2', a=1, d=None,
+                                            created=None, filter_kwargs={'id': 1}, id=None)
 
 
 def test_serializer_dict():
