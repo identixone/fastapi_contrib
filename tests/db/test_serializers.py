@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import asyncio
 
 import pytest
 from fastapi import FastAPI
@@ -15,8 +14,6 @@ from tests.mock import MongoDBMock
 from tests.utils import override_settings
 from unittest.mock import patch
 from tests.utils import AsyncMock
-from unittest.mock import MagicMock
-import asynctest
 
 app = FastAPI()
 
