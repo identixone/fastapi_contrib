@@ -195,8 +195,7 @@ async def test_model_serializer_update_one():
 
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
-# @asynctest.patch('fastapi_contrib.db.models.MongoDBTimeStampedModel.update_one')
-async def test_models_serializer_update_skip_defaults():
+async def test_models_serializer_update_one_skip_defaults():
     with asynctest.patch('fastapi_contrib.db.models.MongoDBModel.update_one') as mock_update:
         mock_update.return_value = asyncio.Future()
         mock_update.return_value.set_result([])
@@ -214,7 +213,6 @@ async def test_models_serializer_update_skip_defaults():
 
             class Meta:
                 model = Model
-
 
         serializer = TestSerializer(c="2")
 
@@ -263,6 +261,39 @@ async def test_model_serializer_update_many():
     serializer = TestSerializer(c="2")
     result = await serializer.update_many({"a": 1})
     assert result.raw_result == {}
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+async def test_models_serializer_update_many_skip_defaults():
+    with asynctest.patch('fastapi_contrib.db.models.MongoDBModel.update_many') as mock_update:
+        mock_update.return_value = asyncio.Future()
+        mock_update.return_value.set_result([])
+
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        @openapi.patch
+        class TestSerializer(ModelSerializer):
+            a = 1
+            c: str
+            d: int = None
+
+            class Meta:
+                model = Model
+
+        serializer = TestSerializer(c="2")
+
+        await serializer.update_many({'id': 1})
+
+        assert mock_update.assert_called_with(c='2', filter_kwargs={'id': 1}) is None
+
+        await serializer.update_many({'id': 1}, skip_defaults=False)
+
+        assert mock_update.assert_called_with(c='2', a=1, d=None,
+                                              created=None, filter_kwargs={'id': 1}, id=None) is None
 
 
 def test_serializer_dict():
