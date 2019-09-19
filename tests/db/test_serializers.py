@@ -263,7 +263,7 @@ async def test_model_serializer_update_many():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_models_serializer_update_many_skip_defaults():
-    with asynctest.patch('fastapi_contrib.db.models.MongoDBModel.update_many', new_callable=AsyncMock) as mock_update:
+    with patch('fastapi_contrib.db.models.MongoDBModel.update_many', new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
 
             class Meta:
