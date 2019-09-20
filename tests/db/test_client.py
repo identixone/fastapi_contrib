@@ -6,9 +6,10 @@ import pytest
 from fastapi import FastAPI
 
 from fastapi_contrib.db.client import MongoDBClient
-from fastapi_contrib.db.models import MongoDBModel
+from fastapi_contrib.db.models import MongoDBModel, MongoDBTimeStampedModel
 from tests.mock import MongoDBMock
-from tests.utils import override_settings
+from tests.utils import override_settings, AsyncMock
+from unittest.mock import patch
 
 app = FastAPI()
 app.mongodb = MongoDBMock()
@@ -100,6 +101,45 @@ async def test_update_one():
         model, filter_kwargs={"field": "value"}, field="value2"
     )
     assert update_result.raw_result == {}
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_client.app")
+async def test_update_one_params():
+    with patch('fastapi_contrib.db.client.MongoDBClient.update_one', new_callable=AsyncMock) as mock_update:
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        client = MongoDBClient()
+
+        model = Model()
+
+        await model.update_one(
+            filter_kwargs={"id": 1}, kwargs={'$set': {'bla': 1}}
+        )
+
+        mock_update.mock.assert_called_with(client, Model, filter_kwargs={'id': 1}, kwargs={'$set': {'bla': 1}})
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_client.app")
+async def test_update_many_params():
+    with patch('fastapi_contrib.db.client.MongoDBClient.update_many', new_callable=AsyncMock) as mock_update:
+        class Model(MongoDBTimeStampedModel):
+            class Meta:
+                collection = "collection"
+
+        client = MongoDBClient()
+
+        model = Model()
+
+        await model.update_many(
+            filter_kwargs={"id": 1}, kwargs={'$set': {'bla': 1}}
+        )
+
+        mock_update.mock.assert_called_with(client, Model, filter_kwargs={'id': 1}, kwargs={'$set': {'bla': 1}})
 
 
 @pytest.mark.asyncio

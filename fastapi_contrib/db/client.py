@@ -85,7 +85,7 @@ class MongoDBClient(object):
         collection_name = model.get_db_collection()
         collection = self.get_collection(collection_name)
         res = await collection.update_one(
-            filter_kwargs, {"$set": kwargs}, session=session
+            filter_kwargs, kwargs, session=session
         )
         return res
 
@@ -103,7 +103,7 @@ class MongoDBClient(object):
         collection_name = model.get_db_collection()
         collection = self.get_collection(collection_name)
         res = await collection.update_many(
-            filter_kwargs, {"$set": kwargs}, session=session
+            filter_kwargs, kwargs, session=session
         )
         return res
 
