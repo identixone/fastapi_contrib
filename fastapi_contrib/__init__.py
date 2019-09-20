@@ -4,4 +4,4 @@
 
 __author__ = """Lev Rubel"""
 __email__ = 'l@datacorp.ee'
-__version__ = '0.1.3'
+__version__ = '0.1.4'
