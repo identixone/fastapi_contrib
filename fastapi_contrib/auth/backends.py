@@ -48,7 +48,10 @@ class AuthBackend(AuthenticationBackend):
             raise AuthenticationError("Invalid authentication credentials")
 
         token = await Token.get(
-            key=credentials, is_active=True, expires={"$gte": get_now()})
+            key=credentials,
+            is_active=True,
+            expires={"$not": {"$lt": get_now()}},
+        )
         if token is None:
             return False, None
         conn.scope["token"] = token
