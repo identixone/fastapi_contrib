@@ -110,7 +110,7 @@ class Serializer(BaseModel):
             await instance.save()
             return instance
 
-    async def update_one(self, filter_kwargs, skip_defaults=True) -> UpdateResult:
+    async def update_one(self, filter_kwargs, skip_defaults=True, array_fields=[]) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -121,10 +121,23 @@ class Serializer(BaseModel):
             hasattr(self, "Meta")
             and getattr(self.Meta, "model", None) is not None
         ):
+            data = {}
+            fields = self.dict(skip_defaults=skip_defaults)
+            if array_fields:
+                tmp_data = {}
+                for i in array_fields:
+                    tmp_data[i] = {'$each': fields.pop(i)}
+                data.update({
+                    '$push': tmp_data
+                })
+            if fields:
+                data.update({
+                    '$set': fields
+                })
             return await self.Meta.model.update_one(
-                filter_kwargs=filter_kwargs, **self.dict(skip_defaults=skip_defaults))
+                filter_kwargs=filter_kwargs, **data)
 
-    async def update_many(self, filter_kwargs, skip_defaults=True) -> UpdateResult:
+    async def update_many(self, filter_kwargs, skip_defaults=True, array_fields=[]) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -135,8 +148,21 @@ class Serializer(BaseModel):
             hasattr(self, "Meta")
             and getattr(self.Meta, "model", None) is not None
         ):
+            data = {}
+            fields = self.dict(skip_defaults=skip_defaults)
+            if array_fields:
+                tmp_data = {}
+                for i in array_fields:
+                    tmp_data[i] = {'$each': fields.pop(i)}
+                data.update({
+                    '$push': tmp_data
+                })
+            if fields:
+                data.update({
+                    '$set': fields
+                })
             return await self.Meta.model.update_many(
-                filter_kwargs=filter_kwargs, **self.dict(skip_defaults=skip_defaults))
+                filter_kwargs=filter_kwargs, **data)
 
     def dict(self, *args, **kwargs) -> dict:
         """

@@ -167,8 +167,8 @@ async def test_model_serializer_save():
             model = Model
 
     serializer = TestSerializer(c="2")
-    result = await serializer.update_one({"a": 1})
-    assert result.raw_result == {}
+    instance = await serializer.save()
+    assert instance.id == 1
 
 
 @pytest.mark.asyncio
@@ -189,8 +189,43 @@ async def test_model_serializer_update_one():
             model = Model
 
     serializer = TestSerializer(c="2")
-    instance = await serializer.save()
-    assert instance.id == 1
+    result = await serializer.update_one({"a": 1})
+    assert result.raw_result == {}
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+async def test_models_serializer_update_one_with_push():
+    with patch('fastapi_contrib.db.models.MongoDBModel.update_one', new_callable=AsyncMock) as mock_update:
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        @openapi.patch
+        class TestSerializer(ModelSerializer):
+            a = 1
+            c: str = ''
+            d: int = None
+            l: list = []
+
+            class Meta:
+                model = Model
+
+        serializer = TestSerializer(c="2", l=[1, 2])
+        await serializer.update_one({'id': 1}, array_fields=['l'])
+
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
+            '$set': {'c': '2'},
+            '$push': {'l': {'$each': [1, 2]}}}
+        )
+
+        serializer = TestSerializer(l=[1, 2])
+        await serializer.update_one({'id': 1}, array_fields=['l'])
+
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
+            '$push': {'l': {'$each': [1, 2]}}}
+        )
 
 
 @pytest.mark.asyncio
@@ -214,13 +249,13 @@ async def test_models_serializer_update_one_skip_defaults():
         serializer = TestSerializer(c="2")
 
         await serializer.update_one({'id': 1})
-
-        mock_update.mock.assert_called_with(c='2', filter_kwargs={'id': 1})
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{'$set': {'c': '2'}})
 
         await serializer.update_one({'id': 1}, skip_defaults=False)
 
-        mock_update.mock.assert_called_with(c='2', a=1, d=None,
-                                            created=None, filter_kwargs={'id': 1}, id=None)
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
+            '$set': {'id': None, 'created': None, 'c': '2', 'a': 1, 'd': None}}
+        )
 
 
 @override_settings(fastapi_app="tests.db.test_serializers.app")
@@ -262,6 +297,41 @@ async def test_model_serializer_update_many():
 
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
+async def test_models_serializer_update_many_with_push():
+    with patch('fastapi_contrib.db.models.MongoDBModel.update_many', new_callable=AsyncMock) as mock_update:
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        @openapi.patch
+        class TestSerializer(ModelSerializer):
+            a = 1
+            c: str = ''
+            d: int = None
+            l: list = []
+
+            class Meta:
+                model = Model
+
+        serializer = TestSerializer(c="2", l=[1, 2])
+        await serializer.update_many({'id': 1}, array_fields=['l'])
+
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
+            '$set': {'c': '2'},
+            '$push': {'l': {'$each': [1, 2]}}}
+        )
+
+        serializer = TestSerializer(l=[1, 2])
+        await serializer.update_many({'id': 1}, array_fields=['l'])
+
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
+            '$push': {'l': {'$each': [1, 2]}}}
+        )
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_models_serializer_update_many_skip_defaults():
     with patch('fastapi_contrib.db.models.MongoDBModel.update_many', new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
@@ -281,13 +351,13 @@ async def test_models_serializer_update_many_skip_defaults():
         serializer = TestSerializer(c="2")
 
         await serializer.update_many({'id': 1})
-
-        mock_update.mock.assert_called_with(c='2', filter_kwargs={'id': 1})
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{'$set': {'c': '2'}})
 
         await serializer.update_many({'id': 1}, skip_defaults=False)
 
-        mock_update.mock.assert_called_with(c='2', a=1, d=None,
-                                            created=None, filter_kwargs={'id': 1}, id=None)
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
+            '$set': {'id': None, 'created': None, 'c': '2', 'a': 1, 'd': None}}
+        )
 
 
 def test_serializer_dict():
