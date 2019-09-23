@@ -207,7 +207,7 @@ async def test_models_serializer_update_one_with_push():
             a = 1
             c: str = ''
             d: int = None
-            l = []
+            l: list = []
 
             class Meta:
                 model = Model
@@ -309,7 +309,7 @@ async def test_models_serializer_update_many_with_push():
             a = 1
             c: str = ''
             d: int = None
-            l = []
+            l: list = []
 
             class Meta:
                 model = Model
@@ -357,7 +357,7 @@ async def test_models_serializer_update_many_skip_defaults():
 
         mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
             '$set': {'id': None, 'created': None, 'c': '2', 'a': 1, 'd': None}}
-                                            )
+        )
 
 
 def test_serializer_dict():
