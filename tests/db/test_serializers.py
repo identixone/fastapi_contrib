@@ -205,7 +205,7 @@ async def test_models_serializer_update_one_with_push():
         @openapi.patch
         class TestSerializer(ModelSerializer):
             a = 1
-            c: str
+            c: str = ''
             d: int = None
             l = []
 
@@ -217,6 +217,13 @@ async def test_models_serializer_update_one_with_push():
 
         mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
             '$set': {'c': '2'},
+            '$push': {'l': {'$each': [1, 2]}}}
+        )
+
+        serializer = TestSerializer(l=[1, 2])
+        await serializer.update_one({'id': 1}, array_fields=['l'])
+
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
             '$push': {'l': {'$each': [1, 2]}}}
         )
 
@@ -300,7 +307,7 @@ async def test_models_serializer_update_many_with_push():
         @openapi.patch
         class TestSerializer(ModelSerializer):
             a = 1
-            c: str
+            c: str = ''
             d: int = None
             l = []
 
@@ -312,6 +319,13 @@ async def test_models_serializer_update_many_with_push():
 
         mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
             '$set': {'c': '2'},
+            '$push': {'l': {'$each': [1, 2]}}}
+        )
+
+        serializer = TestSerializer(l=[1, 2])
+        await serializer.update_many({'id': 1}, array_fields=['l'])
+
+        mock_update.mock.assert_called_with(filter_kwargs={'id': 1}, **{
             '$push': {'l': {'$each': [1, 2]}}}
         )
 
