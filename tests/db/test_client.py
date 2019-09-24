@@ -21,7 +21,19 @@ class Model(MongoDBModel):
 
 
 @override_settings(fastapi_app="tests.db.test_client.app")
+def test_mongodbclient_is_singleton():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
+    client = MongoDBClient()
+    assert client == MongoDBClient()
+
+
+@override_settings(fastapi_app="tests.db.test_client.app")
 def test_get_collection():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     collection = client.get_collection("collection")
     assert collection.name == "collection"
@@ -30,6 +42,9 @@ def test_get_collection():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_insert():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     model = Model(id=1)
     insert_result = await client.insert(model)
@@ -39,6 +54,9 @@ async def test_insert():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_count():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     model = Model(id=1)
     count = await client.count(model, id=1)
@@ -52,6 +70,9 @@ async def test_count():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_delete():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     model = Model(id=1)
     delete_result = await client.delete(model, id=1)
@@ -65,6 +86,9 @@ async def test_delete():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_update_one():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     model = Model(id=1)
     update_result = await client.update_one(
@@ -82,52 +106,48 @@ async def test_update_one():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_update_one_params():
-    with patch(
-        "fastapi_contrib.db.client.MongoDBClient.update_one",
-        new_callable=AsyncMock,
-    ) as mock_update:
-
+    with patch('fastapi_contrib.db.client.MongoDBClient.update_one', new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
+
             class Meta:
                 collection = "collection"
+
+        client = MongoDBClient()
 
         model = Model()
 
         await model.update_one(
-            filter_kwargs={"id": 1}, kwargs={"$set": {"bla": 1}}
+            filter_kwargs={"id": 1}, kwargs={'$set': {'bla': 1}}
         )
 
-        assert mock_update.mock.call_args[1:] == (
-            {"filter_kwargs": {"id": 1}, "kwargs": {"$set": {"bla": 1}}},
-        )
+        mock_update.mock.assert_called_with(client, Model, filter_kwargs={'id': 1}, kwargs={'$set': {'bla': 1}})
 
 
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_update_many_params():
-    with patch(
-        "fastapi_contrib.db.client.MongoDBClient.update_many",
-        new_callable=AsyncMock,
-    ) as mock_update:
-
+    with patch('fastapi_contrib.db.client.MongoDBClient.update_many', new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
             class Meta:
                 collection = "collection"
 
+        client = MongoDBClient()
+
         model = Model()
 
         await model.update_many(
-            filter_kwargs={"id": 1}, kwargs={"$set": {"bla": 1}}
+            filter_kwargs={"id": 1}, kwargs={'$set': {'bla': 1}}
         )
 
-        assert mock_update.mock.call_args[1:] == (
-            {"filter_kwargs": {"id": 1}, "kwargs": {"$set": {"bla": 1}}},
-        )
+        mock_update.mock.assert_called_with(client, Model, filter_kwargs={'id': 1}, kwargs={'$set': {'bla': 1}})
 
 
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_update_many():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     model = Model(id=1)
     update_result = await client.update_many(
@@ -145,6 +165,9 @@ async def test_update_many():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_get():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     model = Model(id=1)
     _dict = await client.get(model, id=1)
@@ -158,6 +181,9 @@ async def test_get():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_list():
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     client = MongoDBClient()
     model = Model(id=1)
     cursor = client.list(model, id=1)

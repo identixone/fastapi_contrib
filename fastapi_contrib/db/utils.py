@@ -47,11 +47,7 @@ def setup_mongodb(app: FastAPI) -> None:
     :param app: app object, instance of FastAPI
     :return: None
     """
-    client = motor.motor_asyncio.AsyncIOMotorClient(
-        settings.mongodb_dsn,
-        minPoolSize=settings.mongodb_min_pool_size,
-        maxPoolSize=settings.mongodb_max_pool_size,
-    )
+    client = motor.motor_asyncio.AsyncIOMotorClient(settings.mongodb_dsn)
     app.mongodb = client[settings.mongodb_dbname]
 
 

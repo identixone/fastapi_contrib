@@ -42,8 +42,6 @@ class Settings(BaseSettings):
 
     mongodb_dsn: str = "mongodb://example:pwd@localhost:27017"
     mongodb_dbname: str = "default"
-    mongodb_min_pool_size: int = 0
-    mongodb_max_pool_size: int = 100
     mongodb_id_generator: str = "fastapi_contrib.db.utils.default_id_generator"
 
     now_function: str = None

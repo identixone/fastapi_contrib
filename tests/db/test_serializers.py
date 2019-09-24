@@ -168,7 +168,7 @@ async def test_model_serializer_save():
 
     serializer = TestSerializer(c="2")
     instance = await serializer.save()
-    assert instance.id == 3
+    assert instance.id == 1
 
 
 @pytest.mark.asyncio
@@ -260,6 +260,11 @@ async def test_models_serializer_update_one_skip_defaults():
 
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 def test_model_serializer_in_route():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
     test_client = TestClient(app)
     response = test_client.post("/test/", json={"c": "cc", "id": 123})
 

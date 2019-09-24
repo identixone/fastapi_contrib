@@ -10,7 +10,7 @@ from fastapi_contrib.common.utils import get_current_app, get_timezone
 
 class MongoDBClient(object):
     """
-    Client for interacting with MongoDB.
+    Singleton client for interacting with MongoDB.
     Operates mostly using models, specified when making DB queries.
 
     Implements only part of internal `motor` methods, but can be populated more.
@@ -18,11 +18,17 @@ class MongoDBClient(object):
     Please don't use it directly, use `fastapi_contrib.db.utils.get_db_client`.
     """
 
-    def __init__(self):
-        app = get_current_app()
-        tzinfo = get_timezone()
-        self.codec_options = CodecOptions(tz_aware=True, tzinfo=tzinfo)
-        self.mongodb = app.mongodb
+    __instance = None
+
+    def __new__(cls) -> "MongoDBClient":
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            app = get_current_app()
+            tzinfo = get_timezone()
+            cls.__instance.codec_options = CodecOptions(
+                tz_aware=True, tzinfo=tzinfo)
+            cls.__instance.mongodb = app.mongodb
+        return cls.__instance
 
     def get_collection(self, collection_name: str) -> Collection:
         return self.mongodb.get_collection(

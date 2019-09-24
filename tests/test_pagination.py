@@ -29,6 +29,10 @@ class TestSerializer(ModelSerializer):
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_paginate_no_filters():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     dumb_request = Request({"type": "http", "method": "GET", "path": "/"})
     pagination = Pagination(request=dumb_request)
     resp = await pagination.paginate(serializer_class=TestSerializer)
@@ -43,6 +47,10 @@ async def test_paginate_no_filters():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_paginate_zero_offset_zero_limit():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     dumb_request = Request(
         {
             "type": "http",
@@ -67,6 +75,10 @@ async def test_paginate_zero_offset_zero_limit():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_paginate_equal_offset_limit():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     dumb_request = Request(
         {
             "type": "http",
@@ -91,6 +103,10 @@ async def test_paginate_equal_offset_limit():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_paginate_offset_less_than_limit():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     dumb_request = Request(
         {
             "type": "http",
@@ -115,6 +131,10 @@ async def test_paginate_offset_less_than_limit():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_paginate_limit_less_than_offset():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     dumb_request = Request(
         {
             "type": "http",
@@ -139,6 +159,10 @@ async def test_paginate_limit_less_than_offset():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
 async def test_paginate_offset_less_than_zero():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     dumb_request = Request(
         {
             "type": "http",

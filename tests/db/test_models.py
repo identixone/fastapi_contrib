@@ -38,6 +38,9 @@ def test_set_created():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_get():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     instance = await Model.get(id=1)
     assert instance.id == 1
 
@@ -46,6 +49,9 @@ async def test_get():
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_get_not_found():
     app.mongodb = MongoDBMock(find_one_result=None)
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     instance = await Model.get(id=1)
     assert instance is None
 
@@ -53,6 +59,9 @@ async def test_get_not_found():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_delete():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     result = await Model.delete(id=1)
     assert result.raw_result == {}
 
@@ -60,6 +69,9 @@ async def test_delete():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_count():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     result = await Model.count(id=1)
     assert result == 1
 
@@ -67,6 +79,9 @@ async def test_count():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_list():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     _list = await Model.list(id=1)
     assert _list == [{"id": 1}]
 
@@ -74,6 +89,9 @@ async def test_list():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_list_raw():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     iterator = await Model.list(raw=False, id=1)
     _list = list(iterator)
     assert isinstance(_list[0], Model)
@@ -84,6 +102,9 @@ async def test_list_raw():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_update_one():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     result = await Model.update_one(filter_kwargs={"id": 1}, id=2)
     assert result.raw_result == {}
 
@@ -91,5 +112,8 @@ async def test_update_one():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
 async def test_update_many():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
     result = await Model.update_many(filter_kwargs={"id": 1}, id=2)
     assert result.raw_result == {}
