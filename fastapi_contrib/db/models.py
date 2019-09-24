@@ -1,5 +1,3 @@
-import copy
-
 from datetime import datetime
 from typing import List, Optional
 
@@ -34,6 +32,7 @@ class MongoDBModel(BaseModel):
         assert isinstance(mymodel.id, int)
 
     """
+
     id: int = None
 
     @validator("id", pre=True, always=True)
@@ -52,7 +51,7 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def get(cls, **kwargs) -> Optional['MongoDBModel']:
+    async def get(cls, **kwargs) -> Optional["MongoDBModel"]:
         db = get_db_client()
         result = await db.get(cls, **kwargs)
         if not result:
@@ -77,15 +76,13 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def list(cls, raw=True, _limit=0, _offset=0, length=100, **kwargs):
+    async def list(cls, raw=True, _limit=0, _offset=0, **kwargs):
         db = get_db_client()
         cursor = db.list(cls, _limit=_limit, _offset=_offset, **kwargs)
-        result = await cursor.to_list(length=length)
-
-        # TODO: write more elegant solution
-        result = copy.deepcopy(result)
-        for _dict in result:
-            _dict["id"] = _dict.pop("_id")
+        result = []
+        async for document in cursor:
+            document["id"] = document.pop("_id")
+            result.append(document)
 
         if not raw:
             return (cls(**record) for record in result)
@@ -150,6 +147,7 @@ class MongoDBTimeStampedModel(MongoDBModel):
         assert isinstance(mymodel.id, int)
         assert isinstance(mymodel.created, datetime)
     """
+
     created: datetime = None
 
     @validator("created", pre=True, always=True)

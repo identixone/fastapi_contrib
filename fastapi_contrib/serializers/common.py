@@ -78,6 +78,7 @@ class Serializer(BaseModel):
         {"id": 1, "field1": "b", "read_only1": "const"}
 
     """
+
     @classmethod
     def sanitize_list(cls, iterable: Iterable) -> List[dict]:
         """
@@ -86,6 +87,7 @@ class Serializer(BaseModel):
         :param iterable: sequence of dicts with model fields (from rows in DB)
         :return: list of cleaned, without `excluded`, dicts with model rows
         """
+
         def clean_d(d):
             if hasattr(cls.Meta, "exclude"):
                 for e in cls.Meta.exclude:
@@ -110,7 +112,9 @@ class Serializer(BaseModel):
             await instance.save()
             return instance
 
-    async def update_one(self, filter_kwargs, skip_defaults=True, array_fields=[]) -> UpdateResult:
+    async def update_one(
+        self, filter_kwargs, skip_defaults=True, array_fields=[]
+    ) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -126,18 +130,17 @@ class Serializer(BaseModel):
             if array_fields:
                 tmp_data = {}
                 for i in array_fields:
-                    tmp_data[i] = {'$each': fields.pop(i)}
-                data.update({
-                    '$push': tmp_data
-                })
+                    tmp_data[i] = {"$each": fields.pop(i)}
+                data.update({"$push": tmp_data})
             if fields:
-                data.update({
-                    '$set': fields
-                })
+                data.update({"$set": fields})
             return await self.Meta.model.update_one(
-                filter_kwargs=filter_kwargs, **data)
+                filter_kwargs=filter_kwargs, **data
+            )
 
-    async def update_many(self, filter_kwargs, skip_defaults=True, array_fields=[]) -> UpdateResult:
+    async def update_many(
+        self, filter_kwargs, skip_defaults=True, array_fields=[]
+    ) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -153,16 +156,13 @@ class Serializer(BaseModel):
             if array_fields:
                 tmp_data = {}
                 for i in array_fields:
-                    tmp_data[i] = {'$each': fields.pop(i)}
-                data.update({
-                    '$push': tmp_data
-                })
+                    tmp_data[i] = {"$each": fields.pop(i)}
+                data.update({"$push": tmp_data})
             if fields:
-                data.update({
-                    '$set': fields
-                })
+                data.update({"$set": fields})
             return await self.Meta.model.update_many(
-                filter_kwargs=filter_kwargs, **data)
+                filter_kwargs=filter_kwargs, **data
+            )
 
     def dict(self, *args, **kwargs) -> dict:
         """
@@ -197,4 +197,5 @@ class ModelSerializer(Serializer):
     Left as a proxy for correct naming until we figure out how to inherit
     all the specific to model-handling methods and fields directly in here.
     """
+
     ...
