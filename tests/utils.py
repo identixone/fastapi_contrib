@@ -13,6 +13,15 @@ def AsyncMock(*args, **kwargs):
     return mock_coro
 
 
+class AsyncIterator:
+    def __init__(self, items):
+        self.items = items
+
+    async def __aiter__(self):
+        for item in self.items:
+            yield item
+
+
 def override_settings(**decorator_kwargs):
     def decorator(function):
         def wrapper(*args, **kwargs):
