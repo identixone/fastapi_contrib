@@ -101,6 +101,34 @@ async def test_list_raw():
 
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_models.app")
+async def test_save():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+    inserted_id = await Model().save()
+    assert inserted_id == 1
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_models.app")
+async def test_save_rewrite_fields():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+
+    class AnswerModel(MongoDBTimeStampedModel):
+        answer: int = 0
+
+        class Meta:
+            collection = "collection"
+
+    model = AnswerModel()
+    await model.save(rewrite_fields={"answer": 42})
+    assert model.answer == 42
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_models.app")
 async def test_update_one():
     from fastapi_contrib.db.client import MongoDBClient
     MongoDBClient.__instance = None

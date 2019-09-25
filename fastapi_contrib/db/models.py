@@ -34,6 +34,7 @@ class MongoDBModel(BaseModel):
         assert isinstance(mymodel.id, int)
 
     """
+
     id: int = None
 
     @validator("id", pre=True, always=True)
@@ -52,7 +53,7 @@ class MongoDBModel(BaseModel):
 
     @classmethod
     @async_timing
-    async def get(cls, **kwargs) -> Optional['MongoDBModel']:
+    async def get(cls, **kwargs) -> Optional["MongoDBModel"]:
         db = get_db_client()
         result = await db.get(cls, **kwargs)
         if not result:
@@ -92,8 +93,20 @@ class MongoDBModel(BaseModel):
         return result
 
     @async_timing
-    async def save(self, include: set = None, exclude: set = None) -> int:
+    async def save(
+        self,
+        include: set = None,
+        exclude: set = None,
+        rewrite_fields: dict = None,
+    ) -> int:
         db = get_db_client()
+
+        if not rewrite_fields:
+            rewrite_fields = {}
+
+        for field, value in rewrite_fields.items():
+            setattr(self, field, value)
+
         insert_result = await db.insert(self, include=include, exclude=exclude)
         self.id = insert_result.inserted_id
         return self.id
@@ -149,6 +162,7 @@ class MongoDBTimeStampedModel(MongoDBModel):
         assert isinstance(mymodel.id, int)
         assert isinstance(mymodel.created, datetime)
     """
+
     created: datetime = None
 
     @validator("created", pre=True, always=True)

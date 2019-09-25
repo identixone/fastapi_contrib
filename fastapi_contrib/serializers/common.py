@@ -8,10 +8,10 @@ from fastapi_contrib.db.models import MongoDBModel
 
 
 class AbstractMeta(ABC):
-    exclude = set()
-    model = None
-    write_only_fields = set()
-    read_only_fields = set()
+    exclude: set = set()
+    model: MongoDBModel = None
+    write_only_fields: set = set()
+    read_only_fields: set = set()
 
 
 class Serializer(BaseModel):
@@ -78,6 +78,7 @@ class Serializer(BaseModel):
         {"id": 1, "field1": "b", "read_only1": "const"}
 
     """
+
     @classmethod
     def sanitize_list(cls, iterable: Iterable) -> List[dict]:
         """
@@ -86,6 +87,7 @@ class Serializer(BaseModel):
         :param iterable: sequence of dicts with model fields (from rows in DB)
         :return: list of cleaned, without `excluded`, dicts with model rows
         """
+
         def clean_d(d):
             if hasattr(cls.Meta, "exclude"):
                 for e in cls.Meta.exclude:
@@ -95,11 +97,22 @@ class Serializer(BaseModel):
 
         return list(map(lambda x: clean_d(x), iterable))
 
-    async def save(self) -> MongoDBModel:
+    async def save(
+        self,
+        include: set = None,
+        exclude: set = None,
+        rewrite_fields: dict = None,
+    ) -> MongoDBModel:
         """
         If we have `model` attribute in Meta, it populates model with data
         and saves it in DB, returning instance of model.
 
+        :param rewrite_fields: dict of fields with values that override any
+                other values for these fields right before inserting into DB.
+                This is useful when you need to set some value explicitly
+                based on request (e.g. user or token).
+        :param include: fields to include from model in DB insert command
+        :param exclude: fields to exclude from model in DB insert command
         :return: model (MongoDBModel) that was saved
         """
         if (
@@ -107,10 +120,17 @@ class Serializer(BaseModel):
             and getattr(self.Meta, "model", None) is not None
         ):
             instance = self.Meta.model(**self.__values__)
-            await instance.save()
+            await instance.save(
+                include=include, exclude=exclude, rewrite_fields=rewrite_fields
+            )
             return instance
 
-    async def update_one(self, filter_kwargs, skip_defaults=True, array_fields=[]) -> UpdateResult:
+    async def update_one(
+        self,
+        filter_kwargs: dict,
+        skip_defaults: bool = True,
+        array_fields: list = None,
+    ) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -123,21 +143,27 @@ class Serializer(BaseModel):
         ):
             data = {}
             fields = self.dict(skip_defaults=skip_defaults)
+
+            if not array_fields:
+                array_fields = []
+
             if array_fields:
                 tmp_data = {}
                 for i in array_fields:
-                    tmp_data[i] = {'$each': fields.pop(i)}
-                data.update({
-                    '$push': tmp_data
-                })
+                    tmp_data[i] = {"$each": fields.pop(i)}
+                data.update({"$push": tmp_data})
             if fields:
-                data.update({
-                    '$set': fields
-                })
+                data.update({"$set": fields})
             return await self.Meta.model.update_one(
-                filter_kwargs=filter_kwargs, **data)
+                filter_kwargs=filter_kwargs, **data
+            )
 
-    async def update_many(self, filter_kwargs, skip_defaults=True, array_fields=[]) -> UpdateResult:
+    async def update_many(
+        self,
+        filter_kwargs: dict,
+        skip_defaults: bool = True,
+        array_fields: list = None,
+    ) -> UpdateResult:
         """
         If we have `model` attribute in Meta, it proxies filters & update data
         and after that returns actual result of update operation.
@@ -150,19 +176,20 @@ class Serializer(BaseModel):
         ):
             data = {}
             fields = self.dict(skip_defaults=skip_defaults)
+
+            if not array_fields:
+                array_fields = []
+
             if array_fields:
                 tmp_data = {}
                 for i in array_fields:
-                    tmp_data[i] = {'$each': fields.pop(i)}
-                data.update({
-                    '$push': tmp_data
-                })
+                    tmp_data[i] = {"$each": fields.pop(i)}
+                data.update({"$push": tmp_data})
             if fields:
-                data.update({
-                    '$set': fields
-                })
+                data.update({"$set": fields})
             return await self.Meta.model.update_many(
-                filter_kwargs=filter_kwargs, **data)
+                filter_kwargs=filter_kwargs, **data
+            )
 
     def dict(self, *args, **kwargs) -> dict:
         """
@@ -197,4 +224,5 @@ class ModelSerializer(Serializer):
     Left as a proxy for correct naming until we figure out how to inherit
     all the specific to model-handling methods and fields directly in here.
     """
+
     ...
