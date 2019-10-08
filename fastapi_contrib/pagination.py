@@ -59,7 +59,7 @@ class Pagination(object):
         if self.offset + self.limit >= self.count:
             return None
         return str(
-            self.request.url.replace_query_params(
+            self.request.url.include_query_params(
                 limit=self.limit, offset=self.offset + self.limit
             )
         )
@@ -78,7 +78,7 @@ class Pagination(object):
             return str(self.request.url.remove_query_params(keys=["offset"]))
 
         return str(
-            self.request.url.replace_query_params(
+            self.request.url.include_query_params(
                 limit=self.limit, offset=self.offset - self.limit
             )
         )

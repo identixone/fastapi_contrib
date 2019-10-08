@@ -56,7 +56,7 @@ async def test_paginate_zero_offset_zero_limit():
             "type": "http",
             "method": "GET",
             "path": "/",
-            "query_string": b"?limit=0&offset=0",
+            "query_string": b"limit=0&offset=0",
             "headers": {},
         }
     )
@@ -84,7 +84,7 @@ async def test_paginate_equal_offset_limit():
             "type": "http",
             "method": "GET",
             "path": "/",
-            "query_string": b"?limit=10&offset=10",
+            "query_string": b"limit=10&offset=10",
             "headers": {},
         }
     )
@@ -95,7 +95,7 @@ async def test_paginate_equal_offset_limit():
     assert resp == {
         "count": 1,
         "next": None,
-        "previous": "/?%3Flimit=10",
+        "previous": "/?limit=10",
         "result": [{"id": 1}],
     }
 
@@ -112,7 +112,7 @@ async def test_paginate_offset_less_than_limit():
             "type": "http",
             "method": "GET",
             "path": "/",
-            "query_string": b"?limit=10&offset=0",
+            "query_string": b"limit=10&offset=0",
             "headers": {},
         }
     )
@@ -140,7 +140,7 @@ async def test_paginate_limit_less_than_offset():
             "type": "http",
             "method": "GET",
             "path": "/",
-            "query_string": b"?limit=1&offset=10",
+            "query_string": b"limit=1&offset=10",
             "headers": {},
         }
     )
@@ -168,7 +168,7 @@ async def test_paginate_offset_less_than_zero():
             "type": "http",
             "method": "GET",
             "path": "/",
-            "query_string": b"?limit=1&offset=-1",
+            "query_string": b"limit=1&offset=-1",
             "headers": {},
         }
     )
@@ -179,6 +179,34 @@ async def test_paginate_offset_less_than_zero():
     assert resp == {
         "count": 1,
         "next": "/?limit=1&offset=0",
+        "previous": None,
+        "result": [{"id": 1}],
+    }
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+async def test_paginate_offset_with_additional_query_params():
+    from fastapi_contrib.db.client import MongoDBClient
+
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+    dumb_request = Request(
+        {
+            "type": "http",
+            "method": "GET",
+            "path": "/",
+            "query_string": b"additional=15&limit=0&offset=0",
+            "headers": {},
+        }
+    )
+    pagination = Pagination(request=dumb_request, limit=0, offset=0)
+    assert pagination.limit == 0
+    assert pagination.offset == 0
+    resp = await pagination.paginate(serializer_class=TestSerializer)
+    assert resp == {
+        "count": 1,
+        "next": "/?additional=15&limit=0&offset=0",
         "previous": None,
         "result": [{"id": 1}],
     }
