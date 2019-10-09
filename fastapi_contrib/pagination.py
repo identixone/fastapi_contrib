@@ -1,11 +1,33 @@
 import asyncio
 
+from fastapi import Query
 from starlette.requests import Request
 
 from fastapi_contrib.serializers.common import Serializer
 
 
-class Pagination(object):
+class PaginationMeta(type):
+    def __new__(mcs, name, bases, namespace, *args, **kwargs):
+        cls = super(PaginationMeta, mcs).__new__(mcs, name, bases, namespace)
+        _cls__init__ = cls.__init__
+
+        def __init__(
+            self,
+            request: Request,
+            offset: int = Query(
+                default=cls.default_offset, ge=0, le=cls.max_offset
+            ),
+            limit: int = Query(
+                default=cls.default_limit, ge=1, le=cls.max_limit
+            ),
+        ):
+            _cls__init__(self, request, offset, limit)
+
+        setattr(cls, "__init__", __init__)
+        return cls
+
+
+class Pagination(metaclass=PaginationMeta):
     """
     Query params parser and db collection paginator in one.
 
@@ -26,12 +48,33 @@ class Pagination(object):
                 serializer_class=SomeSerializer, **filter_kwargs
             )
 
+    Subclass this pagination to define custom
+    default & maximum values for offset & limit:
+
+    .. code-block:: python
+
+        class CustomPagination(Pagination):
+            default_offset = 90
+            default_limit = 1
+            max_offset = 100`
+            max_limit = 2000
+
     :param request: starlette Request object
     :param offset: query param of how many records to skip
     :param limit: query param of how many records to show
     """
 
-    def __init__(self, request: Request, offset: int = 0, limit: int = 100):
+    default_offset = 0
+    default_limit = 100
+    max_offset = None
+    max_limit = 1000
+
+    def __init__(
+        self,
+        request: Request,
+        offset: int = Query(default=default_offset, ge=0, le=max_offset),
+        limit: int = Query(default=default_limit, ge=1, le=max_limit),
+    ):
         self.request = request
         self.offset = offset
         self.limit = limit

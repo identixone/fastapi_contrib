@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from starlette.requests import Request
+from starlette.testclient import TestClient
 
 from fastapi_contrib.db.models import MongoDBTimeStampedModel
 from fastapi_contrib.serializers.common import ModelSerializer
@@ -26,50 +27,95 @@ class TestSerializer(ModelSerializer):
         model = Model
 
 
-@pytest.mark.asyncio
-@override_settings(fastapi_app="tests.db.test_serializers.app")
-async def test_paginate_no_filters():
-    from fastapi_contrib.db.client import MongoDBClient
-
-    MongoDBClient.__instance = None
-    MongoDBClient._MongoDBClient__instance = None
-    dumb_request = Request({"type": "http", "method": "GET", "path": "/"})
-    pagination = Pagination(request=dumb_request)
+@app.get("/hallo/pagination/")
+async def hallo_pagination(pagination: Pagination = Depends()):
     resp = await pagination.paginate(serializer_class=TestSerializer)
-    assert resp == {
-        "count": 1,
-        "next": None,
-        "previous": None,
-        "result": [{"id": 1}],
-    }
+    return resp
 
 
-@pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_serializers.app")
-async def test_paginate_zero_offset_zero_limit():
-    from fastapi_contrib.db.client import MongoDBClient
+def test_paginate_no_filters():
+    with TestClient(app) as client:
+        response = client.get("/hallo/pagination/")
+        assert response.status_code == 200
+        response = response.json()
+        assert response["count"] == 1
 
-    MongoDBClient.__instance = None
-    MongoDBClient._MongoDBClient__instance = None
-    dumb_request = Request(
-        {
-            "type": "http",
-            "method": "GET",
-            "path": "/",
-            "query_string": b"limit=0&offset=0",
-            "headers": {},
-        }
-    )
-    pagination = Pagination(request=dumb_request, limit=0, offset=0)
-    assert pagination.limit == 0
-    assert pagination.offset == 0
-    resp = await pagination.paginate(serializer_class=TestSerializer)
-    assert resp == {
-        "count": 1,
-        "next": "/?limit=0&offset=0",
-        "previous": None,
-        "result": [{"id": 1}],
-    }
+
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+def test_paginate_zero_offset_zero_limit2():
+    with TestClient(app) as client:
+        response = client.get("/hallo/pagination/?limit=0&offset=0")
+        assert response.status_code == 422
+
+
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+def test_custom_pagination_no_filters():
+
+    class CustomPagination(Pagination):
+        default_offset = 90
+        default_limit = 1
+        max_offset = 100
+        max_limit = 2000
+
+    @app.get("/hallo2/pagination2/")
+    async def hallo2_pagination2(pagination: CustomPagination = Depends()):
+        resp = await pagination.paginate(serializer_class=TestSerializer)
+        return resp
+
+    with TestClient(app) as client:
+        response = client.get("/hallo2/pagination2/")
+        assert response.status_code == 200
+
+
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+def test_custom_pagination_correct_filters():
+
+    class CustomPagination2(Pagination):
+        default_offset = 90
+        default_limit = 1
+        max_offset = 100
+        max_limit = 2000
+
+    @app.get("/hallo3/pagination3/")
+    async def hallo3_pagination3(pagination: CustomPagination2 = Depends()):
+        resp = await pagination.paginate(serializer_class=TestSerializer)
+        return resp
+
+    with TestClient(app) as client:
+        response = client.get("/hallo3/pagination3/?limit=1001")
+        assert response.status_code == 200
+
+        response = client.get("/hallo3/pagination3/?offset=99")
+        assert response.status_code == 200
+
+        response = client.get("/hallo3/pagination3/?offset=99&limit=1001")
+        assert response.status_code == 200
+
+
+@override_settings(fastapi_app="tests.db.test_serializers.app")
+def test_custom_pagination_invalid_offset_and_limit():
+
+    class CustomPagination(Pagination):
+        default_offset = 90
+        default_limit = 1
+        max_offset = 100
+        max_limit = 2000
+
+    @app.get("/hallo2/pagination2/")
+    async def hallo2_pagination2(pagination: CustomPagination = Depends()):
+        resp = await pagination.paginate(serializer_class=TestSerializer)
+        return resp
+
+    with TestClient(app) as client:
+        response = client.get("/hallo2/pagination2/?limit=2001")
+        assert response.status_code == 422
+
+        response = client.get("/hallo2/pagination2/?offset=101")
+        assert response.status_code == 422
+
+        response = client.get("/hallo2/pagination2/?offset=101&limit=2001")
+        assert response.status_code == 422
 
 
 @pytest.mark.asyncio
