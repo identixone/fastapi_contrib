@@ -40,6 +40,10 @@ Features
 * Custom Exceptions and Custom Exception Handlers
 * StateRequestIDMiddleware: receives configurable header and saves it in request state
 
+Roadmap
+--------
+
+See GitHub Project `Roadmap <https://github.com/identixone/fastapi_contrib/projects/2>`_.
 
 Usage
 -----
@@ -64,6 +68,16 @@ To use Limit-Offset pagination:
         return await pagination.paginate(
             serializer_class=SomeSerializer, **filter_kwargs
         )
+
+Subclass this pagination to define custom default & maximum values for offset & limit:
+
+.. code-block:: python
+
+    class CustomPagination(Pagination):
+        default_offset = 90
+        default_limit = 1
+        max_offset = 100`
+        max_limit = 2000
 
 
 To use State Request ID Middleware:
