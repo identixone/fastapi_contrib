@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Type
+from typing import Type, List, Set, Mapping, Tuple, Sequence
 
 from pydantic import Required, create_model
+from pydantic.fields import Shape
 
 from fastapi_contrib.serializers.common import AbstractMeta, Serializer
 
@@ -41,7 +42,22 @@ def gen_model(cls: Type, mode: FieldGenerationMode):
                 f_def = t.default
                 if t.required:
                     f_def = Required
-                _fields.update({f: (t.type_, f_def)})
+
+                if t.shape == Shape.LIST:
+                    _type = List[t.type_]
+                elif t.shape == Shape.SET:
+                    _type = Set[t.type_]
+                elif t.shape == Shape.MAPPING:
+                    _type = Mapping[t.key_field.type_, t.type_]
+                elif t.shape == Shape.TUPLE:
+                    _type = t.type_
+                elif t.shape == Shape.TUPLE_ELLIPS:
+                    _type = Tuple[t.type_, ...]
+                elif t.shape == Shape.SEQUENCE:
+                    _type = Sequence[t.type_]
+                else:
+                    _type = t.type_
+                _fields.update({f: (_type, f_def)})
 
     for f, t in cls.__fields__.items():
         if f not in excluded:

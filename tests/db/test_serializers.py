@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from typing import List, Set, Mapping, Tuple, Sequence
 
 import pytest
 from fastapi import FastAPI
@@ -399,3 +400,55 @@ def test_model_serializer_dict():
     serializer = TestSerializer(c="2")
     _dict = serializer.dict()
     assert _dict == {"a": 1}
+
+
+@pytest.mark.asyncio
+async def test_model_serializer_multiple_values_fields():
+    class Model(MongoDBTimeStampedModel):
+        int_list: List[int] = None
+        str_set: Set[str] = None
+        int_mapping: Mapping[int, str] = None
+        str_tuple: Tuple[str, str, str] = None
+        int_tuple_ellips: Tuple[int, ...] = None
+        int_sequence: Sequence[int] = None
+
+        class Meta:
+            collection = "collection"
+
+    @openapi.patch
+    class TestSerializer(ModelSerializer):
+        a = 1
+        c: str
+        d: int = None
+
+        class Meta:
+            model = Model
+
+    serializer = TestSerializer(c="2", int_list=[1, 2, 3])
+    assert serializer.int_list == [1, 2, 3]
+
+    serializer = TestSerializer(c="2", str_set={"1", "2", "3"})
+    assert serializer.str_set == {"1", "2", "3"}
+
+    serializer = TestSerializer(c="2", int_mapping={1: 1, 2: 2, 3: 3})
+    assert serializer.int_mapping == {1: "1", 2: "2", 3: "3"}
+
+    serializer = TestSerializer(c="2", str_tuple=("a", "b", "c"))
+    assert serializer.str_tuple == ("a", "b", "c")
+
+    serializer = TestSerializer(c="2", int_tuple_ellips=(1, 1, 1))
+    assert serializer.int_tuple_ellips == (1, 1, 1)
+
+    serializer = TestSerializer(c="2", int_sequence=(x for x in [2, 3]))
+    assert list(serializer.int_sequence) == [2, 3]
+
+    serializer = TestSerializer(c="2", int_list=[1, 2, 3], str_set={"1", "2", "3"})
+    assert serializer.str_set == {"1", "2", "3"}
+    assert serializer.int_list == [1, 2, 3]
+
+    with pytest.raises(ValidationError) as excinfo:
+        TestSerializer(c="2", int_list=["a", "b", "c"])
+
+    assert excinfo.value.errors()[0]["loc"][0] == "int_list"
+    assert excinfo.value.errors()[0]["msg"] == "value is not a valid integer"
+    assert excinfo.value.errors()[0]["type"] == "type_error.integer"
