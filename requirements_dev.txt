@@ -6,7 +6,7 @@ Sphinx==2.2.0
 twine==2.0.0
 
 motor>=2.0.0
-fastapi>=0.35.0,<=0.37.0
+fastapi==0.42.0
 ujson>=1.35
 pytz==2019.3
 
