@@ -16,13 +16,15 @@ def parse_raw_error(err: Any) -> dict:
     :param err: Error object
     :return: dict with name of the field (or "__all__") and actual message
     """
+    message = err.msg or ""
     if len(err.loc) == 2:
-        name = err.loc[1]
+        name = err.loc[0]
+        message = f"{err.loc[1].lower()}: {message}"
     elif len(err.loc) == 1:
         name = err.loc[0]
     else:
         name = "__all__"
-    return {"name": name, "message": err.msg.capitalize()}
+    return {"name": name, "message": message.capitalize()}
 
 
 def raw_errors_to_fields(raw_errors: List) -> List[dict]:
@@ -79,13 +81,26 @@ async def validation_exception_handler(
     :param exc: StarletteHTTPException instance
     :return: UJSONResponse with newly formatted error data
     """
-    fields = raw_errors_to_fields(exc.raw_errors)
-    status_code = getattr(exc, "status_code", 400)
-    data = {
-        "code": getattr(exc, "error_code", status_code),
-        "detail": getattr(exc, "message", "Validation error"),
-        "fields": fields,
-    }
+    # First, let's determine if the body is empty, since we wouldn't be able
+    # to correctly recognize that from the exception (which would tell us about
+    # missing fields even in the case we have 1 pydantic model to parse request
+    # fields as one object (serializer, for example).
+    body = await request.body()
+    if not body:
+        status_code = 400
+        data = {
+            "code": status_code,
+            "detail": "Empty body for this request is not valid.",
+            "fields": [],
+        }
+    else:
+        fields = raw_errors_to_fields(exc.raw_errors)
+        status_code = getattr(exc, "status_code", 400)
+        data = {
+            "code": getattr(exc, "error_code", status_code),
+            "detail": getattr(exc, "message", "Validation error"),
+            "fields": fields,
+        }
     return UJSONResponse(data, status_code=status_code)
 
 
