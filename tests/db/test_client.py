@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from asyncio import Future
 
 import pytest
 
@@ -8,7 +9,7 @@ from fastapi import FastAPI
 from fastapi_contrib.db.client import MongoDBClient
 from fastapi_contrib.db.models import MongoDBModel, MongoDBTimeStampedModel
 from tests.mock import MongoDBMock
-from tests.utils import override_settings, AsyncMock
+from tests.utils import override_settings, AsyncMock, AsyncIterator
 from unittest.mock import patch
 
 app = FastAPI()
@@ -192,3 +193,26 @@ async def test_list():
     # Test whether it correctly handles filter by non-id
     _dict = client.list(model, field="value")
     assert _dict
+
+
+@pytest.mark.asyncio
+@override_settings(fastapi_app="tests.db.test_client.app")
+async def test_list_with_sort():
+    with patch('fastapi_contrib.db.client.MongoDBClient.list') as mock_update:
+
+        mock_update.return_value = AsyncIterator([])
+
+        class Model(MongoDBTimeStampedModel):
+
+            class Meta:
+                collection = "collection"
+
+        model = Model()
+
+        await model.list(model, _limit=0, _offset=0, _sort=[('i', -1)])
+
+        mock_update.assert_called_with(Model, _limit=0, _offset=0, _sort=[('i', -1)])
+
+        await model.list(model)
+
+        mock_update.assert_called_with(Model, _limit=0, _offset=0, _sort=None)
