@@ -198,9 +198,9 @@ async def test_list():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_list_with_sort():
-    with patch('fastapi_contrib.db.client.MongoDBClient.list') as mock_update:
+    with patch('fastapi_contrib.db.client.MongoDBClient.list') as mock_list:
 
-        mock_update.return_value = AsyncIterator([])
+        mock_list.return_value = AsyncIterator([])
 
         class Model(MongoDBTimeStampedModel):
 
@@ -211,8 +211,8 @@ async def test_list_with_sort():
 
         await model.list(model, _limit=0, _offset=0, _sort=[('i', -1)])
 
-        mock_update.assert_called_with(Model, _limit=0, _offset=0, _sort=[('i', -1)])
+        mock_list.assert_called_with(Model, _limit=0, _offset=0, _sort=[('i', -1)])
 
         await model.list(model)
 
-        mock_update.assert_called_with(Model, _limit=0, _offset=0, _sort=None)
+        mock_list.assert_called_with(Model, _limit=0, _offset=0, _sort=None)
