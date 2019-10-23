@@ -125,6 +125,7 @@ class MongoDBClient(object):
         session: ClientSession = None,
         _offset: int = 0,
         _limit: int = 0,
+        _sort: list = None,
         **kwargs
     ) -> Cursor:
         _id = kwargs.pop("id", None)
@@ -134,5 +135,5 @@ class MongoDBClient(object):
         collection_name = model.get_db_collection()
         collection = self.get_collection(collection_name)
         return collection.find(
-            kwargs, session=session, skip=_offset, limit=_limit
+            kwargs, session=session, skip=_offset, limit=_limit, sort=_sort
         )
