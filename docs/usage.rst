@@ -222,3 +222,58 @@ Should return following response:
 .. code-block:: json
 
     {"id": 1, "field1": "b", "read_only1": "const"}
+
+Auto-creation of MongoDB indexes
+----------------------------------------------------------------
+
+Suppose we have this directory structure:
+
+.. code-block:: console
+
+    -- project_root/
+         -- apps/
+              -- app1/
+                   -- models.py (with MongoDBModel inside with indices declared)
+              -- app2/
+                   -- models.py (with MongoDBModel inside with indices declared)
+
+Based on this, your name of the folder with all the apps would be "apps". This is the default name for fastapi_contrib package to pick up your structure automatically. You can change that by setting ENV variable `CONTRIB_APPS_FOLDER_NAME` (by the way, all the setting of this package are overridable via ENV vars with `CONTRIB_` prefix before them).
+
+You also need to tell fastapi_contrib which apps to look into for your models. This is controlled by `CONTRIB_APPS` ENV variable, which is list of str names of the apps with models. In the example above, this would be `CONTRIB_APPS=["app1","app2"]`.
+
+Just use create_indexes function after setting up mongodb:
+
+.. code-block:: python
+
+    from fastapi import FastAPI
+    from fastapi_contrib.db.utils import setup_mongodb, create_indexes
+
+    app = FastAPI()
+
+    @app.on_event("startup")
+    async def startup():
+        setup_mongodb(app)
+        await create_indexes()
+
+
+This will scan all the specified `CONTRIB_APPS` in the `CONTRIB_APPS_FOLDER_NAME` for models, that are subclassed from either MongoDBModel or MongoDBTimeStampedModel and create indices for any of them that has Meta class with indexes attribute:
+
+models.py:
+
+.. code-block:: python
+
+    import pymongo
+    from fastapi_contrib.db.models import MongoDBTimeStampedModel
+
+
+    class MyModel(MongoDBTimeStampedModel):
+
+        class Meta:
+            collection = "mymodel"
+            indexes = [
+                pymongo.IndexModel(...),
+                pymongo.IndexModel(...),
+            ]
+
+
+This would not create duplicate indices because it relies on pymongo and motor to do all the job.

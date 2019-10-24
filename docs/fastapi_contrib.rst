@@ -10,6 +10,7 @@ Subpackages
    fastapi_contrib.common
    fastapi_contrib.db
    fastapi_contrib.serializers
+   fastapi_contrib.tracing
 
 Submodules
 ----------
