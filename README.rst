@@ -38,6 +38,7 @@ Features
 * MongoDB integration: Use models as if it was Django (based on pydantic models)
 * MongoDB indices verification on startup of the app
 * Custom Exceptions and Custom Exception Handlers
+* Opentracing middleware & setup utility with Jaeger tracer + root span available in every Request's state
 * StateRequestIDMiddleware: receives configurable header and saves it in request state
 
 Roadmap
@@ -50,21 +51,37 @@ Installation
 
 To install just Contrib (without mongodb, pytz, ujson):
 
+.. code-block:: console
+
     $ pip install fastapi_contrib
 
 To install contrib with mongodb support:
+
+.. code-block:: console
 
     $ pip install fastapi_contrib[mongo]
 
 To install contrib with ujson support:
 
+.. code-block:: console
+
     $ pip install fastapi_contrib[ujson]
 
 To install contrib with pytz support:
 
+.. code-block:: console
+
     $ pip install fastapi_contrib[pytz]
 
+To install contrib with opentracing & Jaeger tracer:
+
+.. code-block:: console
+
+    $ pip install fastapi_contrib[jaegertracing]
+
 To install everything:
+
+.. code-block:: console
 
     $ pip install fastapi_contrib[all]
 
@@ -176,6 +193,21 @@ To correctly show slashes in fields with URLs + ascii locking:
     @app.get("/", response_class=UJSONResponse)
     async def root():
         return {"a": "b"}
+
+
+To setup Jaeger tracer and enable Middleware that captures every request in opentracing span:
+
+.. code-block:: python
+
+    from fastapi_contrib.tracing.middlewares import OpentracingMiddleware
+
+    app = FastAPI()
+
+    @app.on_event('startup')
+    async def startup():
+        setup_opentracing(app)
+        app.add_middleware(AuthenticationMiddleware)
+
 
 
 To setup mongodb connection at startup and never worry about it again:

@@ -1,7 +1,3 @@
-=====
-Usage
-=====
-
 To use Limit-Offset pagination:
 
 .. code-block:: python
@@ -22,6 +18,16 @@ To use Limit-Offset pagination:
         return await pagination.paginate(
             serializer_class=SomeSerializer, **filter_kwargs
         )
+
+Subclass this pagination to define custom default & maximum values for offset & limit:
+
+.. code-block:: python
+
+    class CustomPagination(Pagination):
+        default_offset = 90
+        default_limit = 1
+        max_offset = 100`
+        max_limit = 2000
 
 
 To use State Request ID Middleware:
@@ -97,6 +103,21 @@ To correctly show slashes in fields with URLs + ascii locking:
     @app.get("/", response_class=UJSONResponse)
     async def root():
         return {"a": "b"}
+
+
+To setup Jaeger tracer and enable Middleware that captures every request in opentracing span:
+
+.. code-block:: python
+
+    from fastapi_contrib.tracing.middlewares import OpentracingMiddleware
+
+    app = FastAPI()
+
+    @app.on_event('startup')
+    async def startup():
+        setup_opentracing(app)
+        app.add_middleware(AuthenticationMiddleware)
+
 
 
 To setup mongodb connection at startup and never worry about it again:

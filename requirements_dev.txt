@@ -5,10 +5,12 @@ watchdog==0.9.0
 Sphinx==2.2.0
 twine==2.0.0
 
-motor>=2.0.0
 fastapi>=0.35.0,<=0.37.0
-ujson>=1.35
+jaeger-client>=4.1.0
+opentracing>=2.2.0
+motor>=2.0.0
 pytz==2019.3
+ujson>=1.35
 
 coverage==4.5.4
 flake8==3.7.8

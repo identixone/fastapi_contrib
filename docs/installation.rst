@@ -8,11 +8,42 @@ Installation
 Stable release
 --------------
 
-To install FastAPI Contrib, run this command in your terminal:
+To install just Contrib (without mongodb, pytz, ujson):
 
 .. code-block:: console
 
     $ pip install fastapi_contrib
+
+To install contrib with mongodb support:
+
+.. code-block:: console
+
+    $ pip install fastapi_contrib[mongo]
+
+To install contrib with ujson support:
+
+.. code-block:: console
+
+    $ pip install fastapi_contrib[ujson]
+
+To install contrib with pytz support:
+
+.. code-block:: console
+
+    $ pip install fastapi_contrib[pytz]
+
+To install contrib with opentracing & Jaeger tracer:
+
+.. code-block:: console
+
+    $ pip install fastapi_contrib[jaegertracing]
+
+To install everything:
+
+.. code-block:: console
+
+    $ pip install fastapi_contrib[all]
+
 
 This is the preferred method to install FastAPI Contrib, as it will always install the most recent stable release.
 

@@ -40,6 +40,13 @@ class Settings(BaseSettings):
     debug_timing: bool = False
     request_id_header: str = "Request-ID"
 
+    service_name: str = "fastapi_contrib"
+    trace_id_header: str = "X-TRACE-ID"
+    jaeger_host: str = "jaeger"
+    jaeger_port: int = 5775
+    jaeger_sampler_type: str = "probabilistic"
+    jaeger_sampler_rate: float = 1.0
+
     mongodb_dsn: str = "mongodb://example:pwd@localhost:27017"
     mongodb_dbname: str = "default"
     mongodb_min_pool_size: int = 0
