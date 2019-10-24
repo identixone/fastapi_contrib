@@ -45,6 +45,29 @@ Roadmap
 
 See GitHub Project `Roadmap <https://github.com/identixone/fastapi_contrib/projects/2>`_.
 
+Installation
+------------
+
+To install just Contrib (without mongodb, pytz, ujson):
+
+    $ pip install fastapi_contrib
+
+To install contrib with mongodb support:
+
+    $ pip install fastapi_contrib[mongo]
+
+To install contrib with ujson support:
+
+    $ pip install fastapi_contrib[ujson]
+
+To install contrib with pytz support:
+
+    $ pip install fastapi_contrib[pytz]
+
+To install everything:
+
+    $ pip install fastapi_contrib[all]
+
 Usage
 -----
 

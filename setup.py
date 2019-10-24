@@ -11,9 +11,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = [
-    "motor>=2.0.0", "fastapi>=0.35.0", "ujson>=1.35", "pytz"
-]
+requirements = ["fastapi>=0.35.0,<=0.37.0"]
 
 setup_requirements = ["pytest-runner"]
 
@@ -33,12 +31,18 @@ setup(
     ],
     description="Opinionated set of utilities on top of FastAPI",
     install_requires=requirements,
+    extras_require={
+        "mongo": ["motor>=2.0.0"],
+        "ujson": ["ujson>=1.35"],
+        "pytz": ["pytz"],
+        "all": ["motor>=2.0.0", "ujson>=1.35", "pytz"],
+    },
     license="MIT license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
     keywords="fastapi_contrib",
     name="fastapi_contrib",
-    packages=find_packages(exclude=['tests', 'tests.*']),
+    packages=find_packages(exclude=["tests", "tests.*"]),
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
