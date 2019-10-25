@@ -126,7 +126,7 @@ class Pagination(metaclass=PaginationMeta):
             )
         )
 
-    async def get_list(self, **kwargs) -> list:
+    async def get_list(self, _sort=None, **kwargs) -> list:
         """
         Retrieves actual list of records. It comes raw, which means
         it retrieves dict from DB, instead of making conversion
@@ -136,11 +136,17 @@ class Pagination(metaclass=PaginationMeta):
         :return: list of dicts from DB, filtered by kwargs
         """
         self.list = await self.model.list(
-            _limit=self.limit, _offset=self.offset, raw=True, **kwargs
+            _limit=self.limit,
+            _offset=self.offset,
+            _sort=_sort,
+            raw=True,
+            **kwargs
         )
         return self.list
 
-    async def paginate(self, serializer_class: Serializer, **kwargs) -> dict:
+    async def paginate(
+        self, serializer_class: Serializer, _sort=None, **kwargs
+    ) -> dict:
         """
         Actual pagination function, takes serializer class,
         filter options as kwargs and returns dict with the following fields:
@@ -155,7 +161,7 @@ class Pagination(metaclass=PaginationMeta):
         """
         self.model = serializer_class.Meta.model
         count, _list = await asyncio.gather(
-            self.get_count(**kwargs), self.get_list(**kwargs)
+            self.get_count(**kwargs), self.get_list(_sort=_sort, **kwargs)
         )
         # TODO: think about naming and separation of concerns
         _list = serializer_class.sanitize_list(_list)
