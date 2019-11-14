@@ -195,6 +195,15 @@ To correctly show slashes in fields with URLs + ascii locking:
         return {"a": "b"}
 
 
+Or specify it as default response class for the whole app (FastAPI >= 0.39.0):
+
+.. code-block:: python
+
+    from fastapi_contrib.common.responses import UJSONResponse
+
+    app = FastAPI(default_response_class=UJSONResponse)
+
+
 To setup Jaeger tracer and enable Middleware that captures every request in opentracing span:
 
 .. code-block:: python

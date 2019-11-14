@@ -77,7 +77,7 @@ async def test_exception_handler_pydantic_validationerror():
     request = Request(
         {"type": "http", "method": "GET", "path": "/"}, receive=test_receive
     )
-    error = ValidationError([{"hello": "world"}])
+    error = ValidationError([{"hello": "world"}], model=Item)
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
@@ -100,7 +100,7 @@ async def test_exception_handler_pydantic_validationerror_model():
     exc = Exception()
     exc.raw_errors = [ErrorWrapper(loc=("hello", "world"), exc=Exception())]
     error = ValidationError(
-        [ErrorWrapper(loc=("hello", "world"), exc=exc)]
+        [ErrorWrapper(loc=("hello", "world"), exc=exc)], model=Item
     )
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
@@ -110,7 +110,9 @@ async def test_exception_handler_pydantic_validationerror_model():
     assert response["fields"] == [{"name": "hello", "message": "World: "}]
 
     exc = Exception()
-    error = ValidationError([ErrorWrapper(loc=("hello", "world"), exc=exc)])
+    error = ValidationError(
+        [ErrorWrapper(loc=("hello", "world"), exc=exc)], model=Item
+    )
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
