@@ -109,9 +109,22 @@ def test_get_models_from_empty_app_list():
     apps=["auth"]
 )
 async def test_create_indexes():
-    # TODO: do this reset every test in setup
     from fastapi_contrib.db.client import MongoDBClient
     MongoDBClient.__instance = None
     MongoDBClient._MongoDBClient__instance = None
     created_indexes = await create_indexes()
     assert created_indexes == ["tokens"]
+
+
+@pytest.mark.asyncio
+@override_settings(
+    fastapi_app="tests.db.test_utils.app",
+    apps_folder_name="fastapi_contrib",
+    apps=[]
+)
+async def test_create_indexes_not_found_models():
+    from fastapi_contrib.db.client import MongoDBClient
+    MongoDBClient.__instance = None
+    MongoDBClient._MongoDBClient__instance = None
+    created_indexes = await create_indexes()
+    assert created_indexes == []
