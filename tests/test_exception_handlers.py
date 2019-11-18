@@ -70,23 +70,6 @@ def test_exception_handler_starlettehttpexception_custom():
 
 
 @pytest.mark.asyncio
-async def test_exception_handler_pydantic_validationerror():
-    async def test_receive():
-        return {"type": "http.request"}
-
-    request = Request(
-        {"type": "http", "method": "GET", "path": "/"}, receive=test_receive
-    )
-    error = ValidationError([{"hello": "world"}], model=Item)
-    raw_response = await validation_exception_handler(request, error)
-    response = json.loads(raw_response.body.decode("utf-8"))
-
-    assert response["code"] == 400
-    assert response["detail"] == "Empty body for this request is not valid."
-    assert response["fields"] == []
-
-
-@pytest.mark.asyncio
 async def test_exception_handler_pydantic_validationerror_model():
     async def test_receive():
         return {

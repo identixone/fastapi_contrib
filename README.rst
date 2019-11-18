@@ -92,6 +92,7 @@ To use Limit-Offset pagination:
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.pagination import Pagination
     from fastapi_contrib.serializers.common import ModelSerializer
     from yourapp.models import SomeModel
@@ -124,6 +125,7 @@ To use State Request ID Middleware:
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.common.middlewares import StateRequestIDMiddleware
 
     app = FastAPI()
@@ -137,6 +139,7 @@ To use Authentication Middleware:
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.auth.backends import AuthBackend
     from fastapi_contrib.auth.middlewares import AuthenticationMiddleware
 
@@ -151,6 +154,7 @@ Define & use custom permissions based on FastAPI Dependency framework:
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.permissions import BasePermission, PermissionsDependency
 
     class TeapotUserAgentPermission(BasePermission):
@@ -173,6 +177,7 @@ Setup uniform exception-handling:
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.exception_handlers import setup_exception_handlers
 
     app = FastAPI()
@@ -182,10 +187,34 @@ Setup uniform exception-handling:
         setup_exception_handlers(app)
 
 
+If you want to correctly handle scenario when request is an empty body:
+
+.. code-block:: python
+
+    from fastapi import FastAPI
+    from fastapi_contrib.routes import ValidationErrorLoggingRoute
+
+    app = FastAPI()
+    app.router.route_class = ValidationErrorLoggingRoute
+
+
+Or if you use multiple routes for handling different namespaces:
+
+.. code-block:: python
+
+    from fastapi import APIRouter, FastAPI
+    from fastapi_contrib.routes import ValidationErrorLoggingRoute
+
+    app = FastAPI()
+
+    my_router = APIRouter(route_class=ValidationErrorLoggingRoute)
+
+
 To correctly show slashes in fields with URLs + ascii locking:
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.common.responses import UJSONResponse
 
     app = FastAPI()
@@ -199,6 +228,7 @@ Or specify it as default response class for the whole app (FastAPI >= 0.39.0):
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.common.responses import UJSONResponse
 
     app = FastAPI(default_response_class=UJSONResponse)
@@ -208,6 +238,7 @@ To setup Jaeger tracer and enable Middleware that captures every request in open
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.tracing.middlewares import OpentracingMiddleware
 
     app = FastAPI()
@@ -223,6 +254,7 @@ To setup mongodb connection at startup and never worry about it again:
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.db.utils import setup_mongodb
 
     app = FastAPI()
@@ -277,6 +309,7 @@ Use serializers and their response models to correctly show Schemas and convert 
 
 .. code-block:: python
 
+    from fastapi import FastAPI
     from fastapi_contrib.db.models import MongoDBModel
     from fastapi_contrib.serializers import openapi
     from fastapi_contrib.serializers.common import Serializer
