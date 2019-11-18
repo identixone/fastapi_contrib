@@ -2,7 +2,6 @@ from typing import Any, List
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from pydantic import ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.requests import Request
 
@@ -69,7 +68,7 @@ async def http_exception_handler(
 
 
 async def validation_exception_handler(
-    request: Request, exc: ValidationError
+    request: Request, exc: RequestValidationError
 ) -> UJSONResponse:
     """
     Handles ValidationError, translating it into flat dict error data:
@@ -81,26 +80,13 @@ async def validation_exception_handler(
     :param exc: StarletteHTTPException instance
     :return: UJSONResponse with newly formatted error data
     """
-    # First, let's determine if the body is empty, since we wouldn't be able
-    # to correctly recognize that from the exception (which would tell us about
-    # missing fields even in the case we have 1 pydantic model to parse request
-    # fields as one object (serializer, for example).
-    body = await request.body()
-    if not body:
-        status_code = 400
-        data = {
-            "code": status_code,
-            "detail": "Empty body for this request is not valid.",
-            "fields": [],
-        }
-    else:
-        fields = raw_errors_to_fields(exc.raw_errors)
-        status_code = getattr(exc, "status_code", 400)
-        data = {
-            "code": getattr(exc, "error_code", status_code),
-            "detail": getattr(exc, "message", "Validation error"),
-            "fields": fields,
-        }
+    fields = raw_errors_to_fields(exc.raw_errors)
+    status_code = getattr(exc, "status_code", 400)
+    data = {
+        "code": getattr(exc, "error_code", status_code),
+        "detail": getattr(exc, "message", "Validation error"),
+        "fields": fields,
+    }
     return UJSONResponse(data, status_code=status_code)
 
 
@@ -124,4 +110,3 @@ def setup_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(
         RequestValidationError, validation_exception_handler
     )
-    app.add_exception_handler(ValidationError, validation_exception_handler)
