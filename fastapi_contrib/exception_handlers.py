@@ -8,21 +8,36 @@ from starlette.requests import Request
 from fastapi_contrib.common.responses import UJSONResponse
 
 
-def parse_raw_error(err: Any) -> dict:
+def parse_error(err: Any, raw: bool = True) -> dict:
     """
     Parse single error object (such as pydantic-based or fastapi-based) to dict
 
     :param err: Error object
+    :param raw: Whether this is a raw error or wrapped pydantic error
     :return: dict with name of the field (or "__all__") and actual message
     """
     message = err.msg or ""
-    if len(err.loc) == 2:
-        name = err.loc[0]
-        message = f"{err.loc[1].lower()}: {message}"
-    elif len(err.loc) == 1:
-        name = err.loc[0]
+    if not raw:
+        if len(err.loc) == 2:
+            if str(err.loc[0]) == "body":
+                name = err.loc[1]
+            else:
+                name = err.loc[0]
+        elif len(err.loc) == 1:
+            if str(err.loc[0]) == "body":
+                name = "__all__"
+            else:
+                name = str(err.loc[0])
+        else:
+            name = "__all__"
     else:
-        name = "__all__"
+        if len(err.loc) == 2:
+            name = str(err.loc[0])
+            message = f"{str(err.loc[1]).lower()}: {message}"
+        elif len(err.loc) == 1:
+            name = str(err.loc[0])
+        else:
+            name = "__all__"
     return {"name": name, "message": message.capitalize()}
 
 
@@ -37,10 +52,10 @@ def raw_errors_to_fields(raw_errors: List) -> List[dict]:
     for top_err in raw_errors:
         if hasattr(top_err.exc, "raw_errors"):
             for err in top_err.exc.raw_errors:
-                field_err = parse_raw_error(err)
+                field_err = parse_error(err, raw=True)
                 fields.append(field_err)
         else:
-            field_err = parse_raw_error(top_err)
+            field_err = parse_error(top_err, raw=False)
             fields.append(field_err)
     return fields
 

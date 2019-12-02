@@ -14,7 +14,7 @@ from starlette.testclient import TestClient
 
 from fastapi_contrib.exception_handlers import (
     setup_exception_handlers,
-    parse_raw_error,
+    parse_error,
     validation_exception_handler,
 )
 
@@ -94,26 +94,70 @@ async def test_exception_handler_pydantic_validationerror_model():
 
     exc = Exception()
     error = ValidationError(
-        [ErrorWrapper(loc=("hello", "world"), exc=exc)], model=Item
+        [ErrorWrapper(loc=("body", "world22"), exc=exc)], model=Item
     )
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
     assert response["code"] == 400
     assert response["detail"] == "Validation error"
-    assert response["fields"] == [{"name": "hello", "message": "World: "}]
+    assert response["fields"] == [{"name": "world22", "message": ""}]
+
+    exc = Exception()
+    error = ValidationError(
+        [ErrorWrapper(loc=("body", "world22", "missing"), exc=exc)], model=Item
+    )
+    raw_response = await validation_exception_handler(request, error)
+    response = json.loads(raw_response.body.decode("utf-8"))
+
+    assert response["code"] == 400
+    assert response["detail"] == "Validation error"
+    assert response["fields"] == [{"name": "__all__", "message": ""}]
+
+    exc = Exception()
+    error = ValidationError(
+        [ErrorWrapper(loc=("data", "world22"), exc=exc)], model=Item
+    )
+    raw_response = await validation_exception_handler(request, error)
+    response = json.loads(raw_response.body.decode("utf-8"))
+
+    assert response["code"] == 400
+    assert response["detail"] == "Validation error"
+    assert response["fields"] == [{"name": "data", "message": ""}]
+
+    exc = Exception()
+    error = ValidationError(
+        [ErrorWrapper(loc=("body",), exc=exc)], model=Item
+    )
+    raw_response = await validation_exception_handler(request, error)
+    response = json.loads(raw_response.body.decode("utf-8"))
+
+    assert response["code"] == 400
+    assert response["detail"] == "Validation error"
+    assert response["fields"] == [{"name": "__all__", "message": ""}]
+
+    exc = Exception()
+    error = ValidationError(
+        [ErrorWrapper(loc=("data",), exc=exc)], model=Item
+    )
+    raw_response = await validation_exception_handler(request, error)
+    response = json.loads(raw_response.body.decode("utf-8"))
+
+    assert response["code"] == 400
+    assert response["detail"] == "Validation error"
+    assert response["fields"] == [{"name": "data", "message": ""}]
 
 
-def test_parse_raw_error_edge_cases():
+def test_parse_error_edge_cases():
     # TODO: this should be tested through exception raising somehow
     err = MagicMock()
     err.loc = ("field",)
     err.msg = "This field contains an error."
-    parsed_dict = parse_raw_error(err)
+    parsed_dict = parse_error(err)
     assert parsed_dict == {"name": err.loc[0], "message": err.msg}
 
     err = MagicMock()
     err.loc = ()
     err.msg = "This field contains an error."
-    parsed_dict = parse_raw_error(err)
+    parsed_dict = parse_error(err)
     assert parsed_dict == {"name": "__all__", "message": err.msg}

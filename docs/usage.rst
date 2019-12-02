@@ -27,7 +27,7 @@ Subclass this pagination to define custom default & maximum values for offset & 
     class CustomPagination(Pagination):
         default_offset = 90
         default_limit = 1
-        max_offset = 100`
+        max_offset = 100
         max_limit = 2000
 
 
@@ -97,7 +97,7 @@ Setup uniform exception-handling:
         setup_exception_handlers(app)
 
 
-If you want to correctly handle scenario when request is an empty body:
+If you want to correctly handle scenario when request is an empty body (IMPORTANT: non-multipart):
 
 .. code-block:: python
 
@@ -108,7 +108,7 @@ If you want to correctly handle scenario when request is an empty body:
     app.router.route_class = ValidationErrorLoggingRoute
 
 
-Or if you use multiple routes for handling different namespaces:
+Or if you use multiple routes for handling different namespaces (IMPORTANT: non-multipart):
 
 .. code-block:: python
 
