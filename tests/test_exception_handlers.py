@@ -26,6 +26,11 @@ async def startup():
     setup_exception_handlers(app)
 
 
+@app.get("/500/")
+async def internal_server_error_view():
+    raise RuntimeError()
+
+
 @app.get("/starlette/exception/")
 async def starlette_exception():
     raise HTTPException(
@@ -58,6 +63,16 @@ def test_exception_handler_starlettehttpexception_404():
         response = response.json()
         assert response["code"] == 404
         assert response["fields"] == []
+
+
+def test_exception_handler_500():
+    with pytest.raises(RuntimeError):
+        with TestClient(app) as client:
+            response = client.get("/500/")
+            assert response.status_code == 500
+            response = response.json()
+            assert response["code"] == 500
+            assert response["fields"] == []
 
 
 def test_exception_handler_starlettehttpexception_custom():
