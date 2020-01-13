@@ -246,7 +246,7 @@ To setup Jaeger tracer and enable Middleware that captures every request in open
     @app.on_event('startup')
     async def startup():
         setup_opentracing(app)
-        app.add_middleware(AuthenticationMiddleware)
+        app.add_middleware(OpentracingMiddleware)
 
 
 
