@@ -1,11 +1,16 @@
 from typing import Any
 
+import contextvars
+
 from opentracing import tags
 from opentracing.propagation import Format
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+
+request_span = contextvars.ContextVar('request_span')
 
 
 class OpentracingMiddleware(BaseHTTPMiddleware):
@@ -46,6 +51,7 @@ class OpentracingMiddleware(BaseHTTPMiddleware):
         span = self.before_request(request, tracer)
 
         with tracer.scope_manager.activate(span, True) as scope:
+            request_span.set(span)
             request.state.opentracing_span = span
             request.state.opentracing_scope = scope
             request.state.opentracing_tracer = tracer

@@ -26,7 +26,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
     description="Opinionated set of utilities on top of FastAPI",
@@ -54,6 +53,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/identixone/fastapi_contrib",
-    version="0.1.17",
+    version="0.1.20",
     zip_safe=False,
 )
