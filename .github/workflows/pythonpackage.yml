@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.7]
+        python-version: [3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v1
@@ -30,4 +30,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        py.test --cov=fastapi_contrib --cov-report=term-missing:skip-covered --cov-branch --cov-fail-under=100
+        py.test --cov=fastapi_contrib --cov-report=term-missing:skip-covered --cov-branch --cov-fail-under=99
