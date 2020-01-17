@@ -2,16 +2,26 @@
 # -*- coding: utf-8 -*-
 import enum
 import json
-from typing import Optional
+from typing import Optional, Set
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi import FastAPI, Body, Form
-from pydantic import BaseModel, ValidationError, constr
+from fastapi import FastAPI, Body, Query
+from pydantic import (
+    BaseModel,
+    ValidationError,
+    constr,
+    validator,
+    PydanticValueError,
+)
 from pydantic.error_wrappers import ErrorWrapper
 from starlette.requests import Request
 
-from fastapi_contrib.exceptions import HTTPException
+from fastapi_contrib.exceptions import (
+    HTTPException,
+    NotFoundError,
+    InternalServerError,
+)
 from starlette.testclient import TestClient
 
 from fastapi_contrib.exception_handlers import (
@@ -30,12 +40,7 @@ async def startup():
 
 @app.get("/500/")
 async def internal_server_error_view():
-    raise RuntimeError()
-
-
-@app.get("/404/")
-async def not_found_error_view():
-    raise RuntimeError()
+    raise InternalServerError()
 
 
 @app.get("/starlette/exception/")
@@ -72,6 +77,34 @@ class ChoiceItem(BaseModel):
     kind: Kind
 
 
+class CustomValidatorError(PydanticValueError):
+    error_code = 4
+    code = f"error_code.{error_code}"
+    msg_template = "custom message!"
+
+
+class CustomValidationItem(BaseModel):
+    field1: str
+    field2: int
+    field3: float = 42.0
+
+    @validator("field1")
+    def field1_must_contain_42(cls, v):
+        if "42" not in v:
+            raise ValueError("must contain a 42")
+        return v
+
+    @validator("field2")
+    def field2_must_contain_42(cls, v):
+        if v != 42:
+            raise CustomValidatorError()
+        return v
+
+
+class MultipleChoiceModel(BaseModel):
+    multi: Set[Kind] = [e.value for e in Kind]
+
+
 @app.post("/pydantic/exception/model/")
 async def pydantic_exception_model(item: Item):
     return {"item": item.dict()}
@@ -94,23 +127,71 @@ async def pydantic_exception_duplicate(
     return {"kind": kind}
 
 
+@app.post("/pydantic/exception/multiplechoice/")
+async def pydantic_exc_mul_choice(serializer: MultipleChoiceModel) -> dict:
+    return serializer.dict()
+
+
+@app.post("/pydantic/exception/customvalidation/")
+async def pydantic_exception_custom_validation(item: CustomValidationItem):
+    return {"item": item.dict()}
+
+
+@app.get("/pydantic/exception/custom404/")
+async def pydantic_exception_custom_404():
+    raise NotFoundError(detail="this is really bad")
+
+
+@app.get("/pydantic/exception/invalidquery/")
+async def pydantic_exception_invalid_query(q: int = Query(...)):
+    return {"q": q}
+
+
+def test_exception_handler_invalid_query():
+    with TestClient(app) as client:
+        response = client.get(
+            "/pydantic/exception/invalidquery/", params={"q": "$"}
+        )
+        assert response.status_code == 400
+        response = response.json()
+        assert response["error_codes"] == [400]
+        assert response["message"] == "Validation error."
+        assert response["fields"] == [
+            {
+                "name": "q",
+                "message": "Value is not a valid integer",
+                "error_code": 400,
+            }
+        ]
+
+
 def test_exception_handler_starlettehttpexception_404():
     with TestClient(app) as client:
         response = client.get("/")
         assert response.status_code == 404
         response = response.json()
-        assert response["code"] == 404
+        assert response["error_codes"] == [404]
+        assert response["fields"] == []
+
+
+def test_exception_handler_customhttpexception_404():
+    with TestClient(app) as client:
+        response = client.get("/pydantic/exception/custom404/")
+        assert response.status_code == 404
+        response = response.json()
+        assert response["error_codes"] == [404]
+        assert response["message"] == "this is really bad"
         assert response["fields"] == []
 
 
 def test_exception_handler_500():
-    with pytest.raises(RuntimeError):
-        with TestClient(app) as client:
-            response = client.get("/500/")
-            assert response.status_code == 500
-            response = response.json()
-            assert response["code"] == 500
-            assert response["fields"] == []
+    with TestClient(app) as client:
+        response = client.get("/500/")
+        assert response.status_code == 500
+        response = response.json()
+        assert response["error_codes"] == [500]
+        assert response["message"] == "Internal Server Error."
+        assert response["fields"] == []
 
 
 def test_exception_handler_starlettehttpexception_custom():
@@ -118,7 +199,8 @@ def test_exception_handler_starlettehttpexception_custom():
         response = client.get("/starlette/exception/")
         assert response.status_code == 400
         response = response.json()
-        assert response["code"] == 400
+        assert response["error_codes"] == [400]
+        assert response["message"] == "required"
         assert response["fields"] == [{"field": "value"}]
 
 
@@ -129,11 +211,13 @@ def test_exception_handler_when_regex_invalid():
         )
         assert response.status_code == 400
         response = response.json()
-        assert response["code"] == 400
+        assert response["error_codes"] == [400]
+        assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
                 "message": "Provided value doesn't match valid format.",
                 "name": "name",
+                "error_code": 400,
             }
         ]
 
@@ -145,11 +229,31 @@ def test_exception_handler_when_choice_invalid():
         )
         assert response.status_code == 400
         response = response.json()
-        assert response["code"] == 400
+        assert response["error_codes"] == [400]
+        assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
                 "message": "One or more values provided are not valid.",
                 "name": "kind",
+                "error_code": 400,
+            }
+        ]
+
+
+def test_exception_handler_when_one_of_multi_choice_invalid():
+    with TestClient(app) as client:
+        response = client.post(
+            "/pydantic/exception/multiplechoice/", json={"multi": ["d", "a"]}
+        )
+        assert response.status_code == 400
+        response = response.json()
+        assert response["error_codes"] == [400]
+        assert response["message"] == "Validation error."
+        assert response["fields"] == [
+            {
+                "message": "One or more values provided are not valid.",
+                "name": "multi",
+                "error_code": 400,
             }
         ]
 
@@ -161,11 +265,13 @@ def test_exception_handler_when_choice_default_and_received_invalid():
         )
         assert response.status_code == 400
         response = response.json()
-        assert response["code"] == 400
+        assert response["error_codes"] == [400]
+        assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
                 "message": "One or more values provided are not valid.",
                 "name": "kind",
+                "error_code": 400,
             }
         ]
 
@@ -179,17 +285,46 @@ def test_exception_handler_when_choice_default_and_received_invalid():
         )
         assert response.status_code == 400
         response = response.json()
-        assert response["code"] == 400
+        assert response["error_codes"] == [400]
+        assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
                 "message": "One or more values provided are not valid.",
                 "name": "kind",
+                "error_code": 400,
             },
             {
                 "message": "Value is not a valid integer",
-                "name": "temp"
+                "name": "temp",
+                "error_code": 400,
             },
         ]
+
+
+def test_exception_handler_with_custom_field_validator():
+    with TestClient(app) as client:
+        response = client.post(
+            "/pydantic/exception/customvalidation/",
+            json={"field1": "d", "field2": 1},
+        )
+        assert response.status_code == 400
+        response = response.json()
+        assert response == {
+            "error_codes": [400, 4],
+            "message": "Validation error.",
+            "fields": [
+                {
+                    "name": "field1",
+                    "message": "Must contain a 42",
+                    "error_code": 400,
+                },
+                {
+                    "name": "field2",
+                    "message": "Custom message!",
+                    "error_code": 4,
+                },
+            ],
+        }
 
 
 @pytest.mark.asyncio
@@ -203,17 +338,21 @@ async def test_exception_handler_pydantic_validationerror_model():
     request = Request(
         {"type": "http", "method": "GET", "path": "/"}, receive=test_receive
     )
-    exc = Exception()
-    exc.raw_errors = [ErrorWrapper(loc=("hello", "world"), exc=Exception())]
+    exc = Exception("World: ")
+    exc.raw_errors = [
+        ErrorWrapper(loc=("hello", "world"), exc=Exception("World: "))
+    ]
     error = ValidationError(
         [ErrorWrapper(loc=("hello", "world"), exc=exc)], model=Item
     )
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
-    assert response["code"] == 400
-    assert response["detail"] == "Validation error"
-    assert response["fields"] == [{"name": "hello", "message": "World: "}]
+    assert response["error_codes"] == [400]
+    assert response["message"] == "Validation error."
+    assert response["fields"] == [
+        {"name": "hello", "message": "World: ", "error_code": 400}
+    ]
 
     exc = Exception()
     error = ValidationError(
@@ -222,9 +361,11 @@ async def test_exception_handler_pydantic_validationerror_model():
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
-    assert response["code"] == 400
-    assert response["detail"] == "Validation error"
-    assert response["fields"] == [{"name": "world22", "message": ""}]
+    assert response["error_codes"] == [400]
+    assert response["message"] == "Validation error."
+    assert response["fields"] == [
+        {"name": "world22", "message": "", "error_code": 400}
+    ]
 
     exc = Exception()
     error = ValidationError(
@@ -233,9 +374,11 @@ async def test_exception_handler_pydantic_validationerror_model():
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
-    assert response["code"] == 400
-    assert response["detail"] == "Validation error"
-    assert response["fields"] == [{"name": "__all__", "message": ""}]
+    assert response["error_codes"] == [400]
+    assert response["message"] == "Validation error."
+    assert response["fields"] == [
+        {"name": "__all__", "message": "", "error_code": 400}
+    ]
 
     exc = Exception()
     error = ValidationError(
@@ -244,39 +387,46 @@ async def test_exception_handler_pydantic_validationerror_model():
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
-    assert response["code"] == 400
-    assert response["detail"] == "Validation error"
-    assert response["fields"] == [{"name": "data", "message": ""}]
+    assert response["error_codes"] == [400]
+    assert response["message"] == "Validation error."
+    assert response["fields"] == [
+        {"name": "data", "message": "", "error_code": 400}
+    ]
 
     exc = Exception()
     error = ValidationError([ErrorWrapper(loc=("body",), exc=exc)], model=Item)
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
-    assert response["code"] == 400
-    assert response["detail"] == "Validation error"
-    assert response["fields"] == [{"name": "__all__", "message": ""}]
+    assert response["error_codes"] == [400]
+    assert response["message"] == "Validation error."
+    assert response["fields"] == [
+        {"name": "__all__", "message": "", "error_code": 400}
+    ]
 
     exc = Exception()
     error = ValidationError([ErrorWrapper(loc=("data",), exc=exc)], model=Item)
     raw_response = await validation_exception_handler(request, error)
     response = json.loads(raw_response.body.decode("utf-8"))
 
-    assert response["code"] == 400
-    assert response["detail"] == "Validation error"
-    assert response["fields"] == [{"name": "data", "message": ""}]
+    assert response["error_codes"] == [400]
+    assert response["message"] == "Validation error."
+    assert response["fields"] == [
+        {"name": "data", "message": "", "error_code": 400}
+    ]
 
 
 def test_parse_error_edge_cases():
-    # TODO: this should be tested through exception raising somehow
     err = MagicMock()
     err.loc = ("field",)
     err.msg = "This field contains an error."
-    parsed_dict = parse_error(err, field_names=["random"])
-    assert parsed_dict == {"name": err.loc[0], "message": err.msg}
+    parsed_dict = parse_error(err, field_names=["random"], raw=True)
+    assert parsed_dict["name"] == err.loc[0]
+    assert parsed_dict["message"] == err.msg
 
     err = MagicMock()
     err.loc = ()
     err.msg = "This field contains an error."
-    parsed_dict = parse_error(err, field_names=["random"])
-    assert parsed_dict == {"name": "__all__", "message": err.msg}
+    parsed_dict = parse_error(err, field_names=["random"], raw=True)
+    assert parsed_dict["name"] == "__all__"
+    assert parsed_dict["message"] == err.msg

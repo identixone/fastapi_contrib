@@ -68,7 +68,7 @@ def test_doesnt_have_auth_permission():
         assert response.status_code == 401
         response = response.json()
         assert response == {
-            "code": 401,
-            "detail": "Not authenticated.",
+            "error_codes": [401],
+            "message": "Not authenticated.",
             "fields": [],
         }

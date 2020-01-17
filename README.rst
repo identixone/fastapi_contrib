@@ -41,6 +41,11 @@ Features
 * Opentracing middleware & setup utility with Jaeger tracer + root span available in every Request's state
 * StateRequestIDMiddleware: receives configurable header and saves it in request state
 
+History
+--------
+
+See `HISTORY.rst <https://github.com/identixone/fastapi_contrib/blob/master/HISTORY.rst>`_.
+
 Roadmap
 --------
 

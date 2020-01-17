@@ -19,15 +19,23 @@ def parse_error(
     :param raw: Whether this is a raw error or wrapped pydantic error
     :return: dict with name of the field (or "__all__") and actual message
     """
+    print(err.type_, err.loc, raw)
     if err.type_ == "value_error.str.regex":
         message = "Provided value doesn't match valid format."
     elif err.type_ == "type_error.enum":
         message = "One or more values provided are not valid."
     else:
         message = err.msg or ""
+
+    if err.type_.startswith("value_error.error_code"):
+        error_code = int(err.type_.split(".")[-1])
+    else:
+        # default error code for non-custom errors is 400
+        error_code = 400
+
     if not raw:
         if len(err.loc) == 2:
-            if str(err.loc[0]) == "body":
+            if str(err.loc[0]) in ["body", "query"]:
                 name = err.loc[1]
             else:
                 name = err.loc[0]
@@ -41,7 +49,7 @@ def parse_error(
     else:
         if len(err.loc) == 2:
             name = str(err.loc[0])
-            message = f"{str(err.loc[1]).lower()}: {message}"
+            # message = f"{str(err.loc[1]).lower()}: {message}"
         elif len(err.loc) == 1:
             name = str(err.loc[0])
         else:
@@ -50,7 +58,11 @@ def parse_error(
     if name in field_names:
         return None
 
-    return {"name": name, "message": message.capitalize()}
+    return {
+        "name": name,
+        "message": message.capitalize(),
+        "error_code": error_code,
+    }
 
 
 def raw_errors_to_fields(raw_errors: List) -> List[dict]:
@@ -60,7 +72,6 @@ def raw_errors_to_fields(raw_errors: List) -> List[dict]:
     :param raw_errors: List with instances of raw error
     :return: List of dicts (1 dict for every raw error)
     """
-    # import pdb;pdb.set_trace()
     fields = []
     for top_err in raw_errors:
         if hasattr(top_err.exc, "raw_errors"):
@@ -68,7 +79,7 @@ def raw_errors_to_fields(raw_errors: List) -> List[dict]:
                 field_err = parse_error(
                     err,
                     field_names=list(map(lambda x: x["name"], fields)),
-                    raw=True
+                    raw=True,
                 )
                 if field_err is not None:
                     fields.append(field_err)
@@ -76,7 +87,7 @@ def raw_errors_to_fields(raw_errors: List) -> List[dict]:
             field_err = parse_error(
                 top_err,
                 field_names=list(map(lambda x: x["name"], fields)),
-                raw=False
+                raw=False,
             )
             if field_err is not None:
                 fields.append(field_err)
@@ -98,8 +109,8 @@ async def http_exception_handler(
     """
     fields = getattr(exc, "fields", [])
     data = {
-        "code": getattr(exc, "error_code", exc.status_code),
-        "detail": getattr(exc, "message", exc.detail),
+        "error_codes": [getattr(exc, "error_code", exc.status_code)],
+        "message": getattr(exc, "detail", "Validation error."),
         "fields": fields,
     }
     return UJSONResponse(data, status_code=exc.status_code)
@@ -118,35 +129,30 @@ async def validation_exception_handler(
     :param exc: StarletteHTTPException instance
     :return: UJSONResponse with newly formatted error data
     """
-    fields = raw_errors_to_fields(exc.raw_errors)
     status_code = getattr(exc, "status_code", 400)
+    fields = raw_errors_to_fields(exc.raw_errors)
+
+    if fields:
+        error_codes = set(list(map(lambda x: x["error_code"], fields)))
+    else:
+        error_codes = [getattr(exc, "error_code", status_code)]
+
     data = {
-        "code": getattr(exc, "error_code", status_code),
-        "detail": getattr(exc, "message", "Validation error"),
+        "error_codes": error_codes,
+        "message": getattr(exc, "message", "Validation error."),
         "fields": fields,
     }
-    return UJSONResponse(data, status_code=status_code)
-
-
-async def internal_server_error_handler(
-    request: Request, exc: RequestValidationError
-) -> UJSONResponse:
-    code = exc.error_code if hasattr(exc, "error_code") else 500
-    detail = exc.detail if hasattr(exc, "detail") else "Internal Server Error."
-    fields = exc.fields if hasattr(exc, "fields") else []
-    status_code = exc.status_code if hasattr(exc, "status_code") else 500
-    data = {"code": code, "detail": detail, "fields": fields}
     return UJSONResponse(data, status_code=status_code)
 
 
 async def not_found_error_handler(
     request: Request, exc: RequestValidationError
 ) -> UJSONResponse:
-    code = exc.error_code if hasattr(exc, "error_code") else 404
-    detail = exc.detail if hasattr(exc, "detail") else "Not found."
-    fields = exc.fields if hasattr(exc, "fields") else []
-    status_code = exc.status_code if hasattr(exc, "status_code") else 404
-    data = {"code": code, "detail": detail, "fields": fields}
+    code = getattr(exc, "error_code", 404)
+    detail = getattr(exc, "detail", "Not found.")
+    fields = getattr(exc, "fields", [])
+    status_code = getattr(exc, "status_code", 404)
+    data = {"error_codes": [code], "message": detail, "fields": fields}
     return UJSONResponse(data, status_code=status_code)
 
 
@@ -171,4 +177,3 @@ def setup_exception_handlers(app: FastAPI) -> None:
         RequestValidationError, validation_exception_handler
     )
     app.add_exception_handler(404, not_found_error_handler)
-    app.add_exception_handler(500, internal_server_error_handler)

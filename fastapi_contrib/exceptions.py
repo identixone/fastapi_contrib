@@ -103,3 +103,24 @@ class NotFoundError(HTTPException):
             detail=detail,
             fields=fields,
         )
+
+
+class InternalServerError(HTTPException):
+    def __init__(
+        self,
+        error_code: int = 500,
+        detail: Any = "Internal Server Error.",
+        fields: List[Dict] = None,
+    ):
+        """
+        Generic Internal Server Error with support for custom error code.
+
+        :param error_code: Custom error code, unique throughout the app
+        :param detail: detailed message of the error
+        """
+        super().__init__(
+            error_code=error_code,
+            status_code=500,
+            detail=detail,
+            fields=fields,
+        )

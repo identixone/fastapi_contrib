@@ -2,11 +2,13 @@ language: python
 python:
 - 3.8
 - 3.7
+- 3.6
 install: pip install -U tox-travis
 script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
+  skip_existing: true
   user: identixone
   password:
     secure: LW3LxTFsfGqnJKyJmu+fOiDT5bJfBuhkrYjXPWnXY18uCnn/gWnivHtsQNcXK8x6PeRMjHZweFbqJ/xnlPLpqdp4xSWmMhrDX0yP0gsC/6P2dssicvfjuQlN2V1+NEcBYOaAvSoafxQ6b5uPmLuFjNbNQGvLmupsvvXVBgAUnoAS9bC4av7nNmCS8YFDP0kxNd4aP0VNzOxgIxLxdcJtRQgFyGjun7DH2Oj851YxRS5/AOES4zZcjuhNUyJX0zpry5HIPN/uheJKquaBz9tRkSREY88TA+kMAiEflZooY68YsVfNJWl7RRxdQh9jKEz3VqSpObNxT3nl1dKMzrv8Opm0WCst9hHn735ZQcE2Od3uUjH7mTgtJv7x+UHcHkdT9p7hMmSJfxog8kY9Ys0P1gsUyXp5/Ol+xEKuSVSAvyxGRSnryoANsTAlyRKmKlr3CT1xdzPb5f7yrd3+MceuwDCHilSI7TVWVslnYRiDZWWBhefKmxddAMu1xSKe3NDaF/5W0s3vuwy9vEQF2cjLn6oiNhzQFL+BWV4UGgRP0GBHobI/oWCZVUE1aCEfIhGIYoWYggHddYuH4Rh/qQMs22OxND5WnX30mYtHLCB8TP+VkEwY7IpQ++r0P8dFxofiuamFhl503CRXEUs/K1oExOS5PETD7cyjdDbJ+JAZwIk=

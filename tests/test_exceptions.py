@@ -5,7 +5,7 @@ import pytest
 
 from fastapi_contrib.exceptions import (
     HTTPException, BadRequestError, ForbiddenError, NotFoundError,
-    UnauthorizedError)
+    UnauthorizedError, InternalServerError)
 
 from starlette import status
 
@@ -120,4 +120,29 @@ def test_not_found_exception():
     exc = excinfo.value
     assert exc.error_code == error_code
     assert exc.status_code == status.HTTP_404_NOT_FOUND
+    assert exc.detail == detail
+
+
+def test_internal_server_error_exception():
+    detail = "We failed."
+    with pytest.raises(InternalServerError) as excinfo:
+        raise InternalServerError(
+            detail=detail
+        )
+
+    exc = excinfo.value
+    assert exc.error_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert exc.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert exc.detail == detail
+
+    error_code = 555
+    with pytest.raises(InternalServerError) as excinfo:
+        raise InternalServerError(
+            detail=detail,
+            error_code=error_code
+        )
+
+    exc = excinfo.value
+    assert exc.error_code == error_code
+    assert exc.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert exc.detail == detail
