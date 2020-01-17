@@ -19,7 +19,6 @@ def parse_error(
     :param raw: Whether this is a raw error or wrapped pydantic error
     :return: dict with name of the field (or "__all__") and actual message
     """
-    print(err.type_, err.loc, raw)
     if err.type_ == "value_error.str.regex":
         message = "Provided value doesn't match valid format."
     elif err.type_ == "type_error.enum":
