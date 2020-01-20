@@ -155,6 +155,17 @@ async def not_found_error_handler(
     return UJSONResponse(data, status_code=status_code)
 
 
+async def internal_server_error_handler(
+    request: Request, exc: RequestValidationError
+) -> UJSONResponse:
+    code = getattr(exc, "error_code", 500)
+    detail = getattr(exc, "detail", "Internal Server Error.")
+    fields = getattr(exc, "fields", [])
+    status_code = getattr(exc, "status_code", 500)
+    data = {"error_codes": [code], "message": detail, "fields": fields}
+    return UJSONResponse(data, status_code=status_code)
+
+
 def setup_exception_handlers(app: FastAPI) -> None:
     """
     Helper function to setup exception handlers for app.
@@ -176,3 +187,4 @@ def setup_exception_handlers(app: FastAPI) -> None:
         RequestValidationError, validation_exception_handler
     )
     app.add_exception_handler(404, not_found_error_handler)
+    app.add_exception_handler(500, internal_server_error_handler)
