@@ -105,6 +105,17 @@ class MultipleChoiceModel(BaseModel):
     multi: Set[Kind] = [e.value for e in Kind]
 
 
+class MultipleIntModel(BaseModel):
+    integers: Optional[Set[int]] = None
+
+
+@app.post("/pydantic/exception/multipleint/")
+async def pydantic_exc_mul_int(
+    request: Request, serializer: MultipleIntModel
+) -> dict:
+    return serializer.dict()
+
+
 @app.post("/pydantic/exception/model/")
 async def pydantic_exception_model(item: Item):
     return {"item": item.dict()}
@@ -159,7 +170,7 @@ def test_exception_handler_invalid_query():
         assert response["fields"] == [
             {
                 "name": "q",
-                "message": "Value is not a valid integer",
+                "message": "Value is not a valid integer.",
                 "error_code": 400,
             }
         ]
@@ -200,7 +211,7 @@ def test_exception_handler_starlettehttpexception_custom():
         assert response.status_code == 400
         response = response.json()
         assert response["error_codes"] == [400]
-        assert response["message"] == "required"
+        assert response["message"] == "required."
         assert response["fields"] == [{"field": "value"}]
 
 
@@ -294,7 +305,7 @@ def test_exception_handler_when_choice_default_and_received_invalid():
                 "error_code": 400,
             },
             {
-                "message": "Value is not a valid integer",
+                "message": "Value is not a valid integer.",
                 "name": "temp",
                 "error_code": 400,
             },
@@ -315,7 +326,7 @@ def test_exception_handler_with_custom_field_validator():
             "fields": [
                 {
                     "name": "field1",
-                    "message": "Must contain a 42",
+                    "message": "Must contain a 42.",
                     "error_code": 400,
                 },
                 {
@@ -323,6 +334,26 @@ def test_exception_handler_with_custom_field_validator():
                     "message": "Custom message!",
                     "error_code": 4,
                 },
+            ],
+        }
+
+
+def test_exception_handler_with_list_str_instead_of_ints():
+    with TestClient(app) as client:
+        response = client.post(
+            "/pydantic/exception/multipleint/", json={"integers": ["d"]}
+        )
+        assert response.status_code == 400
+        response = response.json()
+        assert response == {
+            "error_codes": [400],
+            "message": "Validation error.",
+            "fields": [
+                {
+                    "name": "integers",
+                    "message": "Value is not a valid integer.",
+                    "error_code": 400,
+                }
             ],
         }
 
@@ -340,7 +371,7 @@ async def test_exception_handler_pydantic_validationerror_model():
     )
     exc = Exception("World: ")
     exc.raw_errors = [
-        ErrorWrapper(loc=("hello", "world"), exc=Exception("World: "))
+        ErrorWrapper(loc=("hello", "world"), exc=Exception("World!"))
     ]
     error = ValidationError(
         [ErrorWrapper(loc=("hello", "world"), exc=exc)], model=Item
@@ -351,7 +382,7 @@ async def test_exception_handler_pydantic_validationerror_model():
     assert response["error_codes"] == [400]
     assert response["message"] == "Validation error."
     assert response["fields"] == [
-        {"name": "hello", "message": "World: ", "error_code": 400}
+        {"name": "hello", "message": "World!", "error_code": 400}
     ]
 
     exc = Exception()

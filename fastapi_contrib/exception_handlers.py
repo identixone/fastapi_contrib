@@ -57,11 +57,13 @@ def parse_error(
     if name in field_names:
         return None
 
-    return {
-        "name": name,
-        "message": message.capitalize(),
-        "error_code": error_code,
-    }
+    if message and not any(
+        [message.endswith("."), message.endswith("?"), message.endswith("!")]
+    ):
+        message = message + "."
+    message = message.capitalize()
+
+    return {"name": name, "message": message, "error_code": error_code}
 
 
 def raw_errors_to_fields(raw_errors: List) -> List[dict]:
@@ -75,6 +77,10 @@ def raw_errors_to_fields(raw_errors: List) -> List[dict]:
     for top_err in raw_errors:
         if hasattr(top_err.exc, "raw_errors"):
             for err in top_err.exc.raw_errors:
+                # This is a special case when errors happen both in request
+                # handling & internal validation
+                if isinstance(err, list):
+                    err = err[0]
                 field_err = parse_error(
                     err,
                     field_names=list(map(lambda x: x["name"], fields)),
@@ -107,9 +113,14 @@ async def http_exception_handler(
     :return: UJSONResponse with newly formatted error data
     """
     fields = getattr(exc, "fields", [])
+    message = getattr(exc, "detail", "Validation error.")
+    if message and not any(
+        [message.endswith("."), message.endswith("?"), message.endswith("!")]
+    ):
+        message = message + "."
     data = {
         "error_codes": [getattr(exc, "error_code", exc.status_code)],
-        "message": getattr(exc, "detail", "Validation error."),
+        "message": message,
         "fields": fields,
     }
     return UJSONResponse(data, status_code=exc.status_code)
@@ -136,11 +147,13 @@ async def validation_exception_handler(
     else:
         error_codes = [getattr(exc, "error_code", status_code)]
 
-    data = {
-        "error_codes": error_codes,
-        "message": getattr(exc, "message", "Validation error."),
-        "fields": fields,
-    }
+    message = getattr(exc, "message", "Validation error.")
+    if message and not any(
+        [message.endswith("."), message.endswith("?"), message.endswith("!")]
+    ):
+        message = message + "."  # pragma: no cover
+
+    data = {"error_codes": error_codes, "message": message, "fields": fields}
     return UJSONResponse(data, status_code=status_code)
 
 
