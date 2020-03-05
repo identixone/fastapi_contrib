@@ -2,7 +2,14 @@ from enum import Enum
 from typing import Type, List, Set, Mapping, Tuple, Sequence
 
 from pydantic import Required, create_model
-from pydantic.fields import Shape
+from pydantic.fields import (
+    SHAPE_LIST,
+    SHAPE_SET,
+    SHAPE_MAPPING,
+    SHAPE_TUPLE,
+    SHAPE_TUPLE_ELLIPSIS,
+    SHAPE_SEQUENCE,
+)
 
 from fastapi_contrib.serializers.common import AbstractMeta, Serializer
 
@@ -11,6 +18,7 @@ class FieldGenerationMode(int, Enum):
     """
     Defines modes in which fields of decorated serializer should be generated.
     """
+
     REQUEST = 1
     RESPONSE = 2
 
@@ -43,17 +51,17 @@ def gen_model(cls: Type, mode: FieldGenerationMode):
                 if t.required:
                     f_def = Required
 
-                if t.shape == Shape.LIST:
+                if t.shape == SHAPE_LIST:
                     _type = List[t.type_]
-                elif t.shape == Shape.SET:
+                elif t.shape == SHAPE_SET:
                     _type = Set[t.type_]
-                elif t.shape == Shape.MAPPING:
+                elif t.shape == SHAPE_MAPPING:
                     _type = Mapping[t.key_field.type_, t.type_]
-                elif t.shape == Shape.TUPLE:
+                elif t.shape == SHAPE_TUPLE:
                     _type = t.type_
-                elif t.shape == Shape.TUPLE_ELLIPS:
+                elif t.shape == SHAPE_TUPLE_ELLIPSIS:
                     _type = Tuple[t.type_, ...]
-                elif t.shape == Shape.SEQUENCE:
+                elif t.shape == SHAPE_SEQUENCE:
                     _type = Sequence[t.type_]
                 else:
                     _type = t.type_
@@ -82,4 +90,6 @@ def gen_model(cls: Type, mode: FieldGenerationMode):
 
         return model
 
-    return create_model(f"{cls.__name__}Response", __config__=Config, **_fields)
+    return create_model(
+        f"{cls.__name__}Response", __config__=Config, **_fields
+    )
