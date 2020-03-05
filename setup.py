@@ -12,7 +12,8 @@ with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
 requirements = [
-    'fastapi==0.42.0',
+    'fastapi==0.52.0',
+    'pydantic==1.4',
     'contextvars;python_version<"3.7"'
 ]
 
