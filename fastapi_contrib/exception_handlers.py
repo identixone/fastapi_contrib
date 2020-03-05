@@ -2,6 +2,7 @@ from typing import Any, List, Optional
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from pydantic import EnumError, StrRegexError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.requests import Request
 
@@ -19,38 +20,38 @@ def parse_error(
     :param raw: Whether this is a raw error or wrapped pydantic error
     :return: dict with name of the field (or "__all__") and actual message
     """
-    if err.type_ == "value_error.str.regex":
-        message = "Provided value doesn't match valid format."
-    elif err.type_ == "type_error.enum":
-        message = "One or more values provided are not valid."
-    else:
-        message = err.msg or ""
 
-    if err.type_.startswith("value_error.error_code"):
-        error_code = int(err.type_.split(".")[-1])
+    if isinstance(err.exc, EnumError):
+        message = "One or more values provided are not valid."
+    elif isinstance(err.exc, StrRegexError):
+        message = "Provided value doesn't match valid format."
+    else:
+        message = str(err.exc) or ""
+
+    if hasattr(err.exc, "code") and err.exc.code.startswith("error_code"):
+        error_code = int(err.exc.code.split(".")[-1])
     else:
         # default error code for non-custom errors is 400
         error_code = 400
 
     if not raw:
-        if len(err.loc) == 2:
-            if str(err.loc[0]) in ["body", "query"]:
-                name = err.loc[1]
+        if len(err.loc_tuple()) == 2:
+            if str(err.loc_tuple()[0]) in ["body", "query"]:
+                name = err.loc_tuple()[1]
             else:
-                name = err.loc[0]
-        elif len(err.loc) == 1:
-            if str(err.loc[0]) == "body":
+                name = err.loc_tuple()[0]
+        elif len(err.loc_tuple()) == 1:
+            if str(err.loc_tuple()[0]) == "body":
                 name = "__all__"
             else:
-                name = str(err.loc[0])
+                name = str(err.loc_tuple()[0])
         else:
             name = "__all__"
     else:
-        if len(err.loc) == 2:
-            name = str(err.loc[0])
-            # message = f"{str(err.loc[1]).lower()}: {message}"
-        elif len(err.loc) == 1:
-            name = str(err.loc[0])
+        if len(err.loc_tuple()) == 2:
+            name = str(err.loc_tuple()[0])
+        elif len(err.loc_tuple()) == 1:
+            name = str(err.loc_tuple()[0])
         else:
             name = "__all__"
 

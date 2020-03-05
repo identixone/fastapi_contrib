@@ -2,6 +2,17 @@
 History
 =======
 
+0.2.4
+--------
+
+General changes:
+
+* Added support for latest FastAPI & Pydantic (fastapi==0.52.0, pydantic==1.4)
+
+Breaking changes:
+
+* Due to the breaking changes between pydantic < 1.0 and pydantic > 1.0 this version will only work with the latter.
+
 0.2.0
 --------
 
