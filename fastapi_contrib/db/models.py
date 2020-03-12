@@ -1,5 +1,3 @@
-import copy
-
 from datetime import datetime
 from typing import List, Optional
 
@@ -8,6 +6,13 @@ from pymongo.results import UpdateResult, DeleteResult
 
 from fastapi_contrib.common.utils import async_timing, get_now
 from fastapi_contrib.db.utils import get_db_client, get_next_id
+
+
+class NotSet(object):
+    ...
+
+
+notset = NotSet()
 
 
 class MongoDBModel(BaseModel):

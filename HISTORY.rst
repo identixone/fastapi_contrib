@@ -2,6 +2,13 @@
 History
 =======
 
+0.2.5
+--------
+
+Bugfix:
+
+* Added sentinel value to allow None values in "id" field to be passed to Model internal methods
+
 0.2.4
 --------
 

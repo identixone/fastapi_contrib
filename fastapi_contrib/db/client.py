@@ -4,7 +4,7 @@ from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from pymongo.results import InsertOneResult, DeleteResult, UpdateResult
 
-from fastapi_contrib.db.models import MongoDBModel
+from fastapi_contrib.db.models import MongoDBModel, notset
 from fastapi_contrib.common.utils import get_current_app, get_timezone
 
 
@@ -50,8 +50,8 @@ class MongoDBClient(object):
     async def count(
         self, model: MongoDBModel, session: ClientSession = None, **kwargs
     ) -> int:
-        _id = kwargs.pop("id", None)
-        if _id is not None:
+        _id = kwargs.pop("id", notset)
+        if _id != notset:
             kwargs["_id"] = _id
 
         collection_name = model.get_db_collection()
@@ -62,8 +62,8 @@ class MongoDBClient(object):
     async def delete(
         self, model: MongoDBModel, session: ClientSession = None, **kwargs
     ) -> DeleteResult:
-        _id = kwargs.pop("id", None)
-        if _id is not None:
+        _id = kwargs.pop("id", notset)
+        if _id != notset:
             kwargs["_id"] = _id
 
         collection_name = model.get_db_collection()
@@ -78,8 +78,8 @@ class MongoDBClient(object):
         session: ClientSession = None,
         **kwargs
     ) -> UpdateResult:
-        _id = filter_kwargs.pop("id", None)
-        if _id is not None:
+        _id = filter_kwargs.pop("id", notset)
+        if _id != notset:
             filter_kwargs["_id"] = _id
 
         collection_name = model.get_db_collection()
@@ -96,8 +96,8 @@ class MongoDBClient(object):
         session: ClientSession = None,
         **kwargs
     ) -> UpdateResult:
-        _id = filter_kwargs.pop("id", None)
-        if _id is not None:
+        _id = filter_kwargs.pop("id", notset)
+        if _id != notset:
             filter_kwargs["_id"] = _id
 
         collection_name = model.get_db_collection()
@@ -110,8 +110,8 @@ class MongoDBClient(object):
     async def get(
         self, model: MongoDBModel, session: ClientSession = None, **kwargs
     ) -> dict:
-        _id = kwargs.pop("id", None)
-        if _id is not None:
+        _id = kwargs.pop("id", notset)
+        if _id != notset:
             kwargs["_id"] = _id
 
         collection_name = model.get_db_collection()
@@ -128,8 +128,8 @@ class MongoDBClient(object):
         _sort: list = None,
         **kwargs
     ) -> Cursor:
-        _id = kwargs.pop("id", None)
-        if _id is not None:
+        _id = kwargs.pop("id", notset)
+        if _id != notset:
             kwargs["_id"] = _id
 
         collection_name = model.get_db_collection()

@@ -55,6 +55,14 @@ fastapi\_contrib.permissions module
    :undoc-members:
    :show-inheritance:
 
+fastapi\_contrib.routes module
+------------------------------
+
+.. automodule:: fastapi_contrib.routes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Module contents
 ---------------
