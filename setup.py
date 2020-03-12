@@ -38,12 +38,12 @@ setup(
     install_requires=requirements,
     extras_require={
         "mongo": ["motor>=2.0.0"],
-        "ujson": ["ujson>=1.35"],
+        "ujson": ["ujson<2.0.0"],
         "pytz": ["pytz"],
         "jaegertracing": ["jaeger-client>=4.1.0", "opentracing>=2.2.0"],
         "all": [
             "motor>=2.0.0",
-            "ujson>=1.35",
+            "ujson<2.0.0",
             "pytz",
             "jaeger-client>=4.1.0",
             "opentracing>=2.2.0",
