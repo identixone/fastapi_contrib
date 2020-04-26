@@ -2,7 +2,7 @@ pip==20.0.2
 bumpversion==0.5.3
 wheel==0.34.2
 watchdog==0.10.2
-Sphinx==2.4.3
+Sphinx==3.0.3
 twine==3.1.1
 
 contextvars==2.4;python_version<"3.7"
