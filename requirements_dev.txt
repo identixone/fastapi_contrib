@@ -11,7 +11,7 @@ pydantic==1.4
 jaeger-client>=4.1.0
 opentracing>=2.2.0
 motor>=2.0.0
-pytz==2019.3
+pytz==2020.1
 ujson<2.0.0
 
 coverage==5.0.3
