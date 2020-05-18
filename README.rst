@@ -122,7 +122,7 @@ Subclass this pagination to define custom default & maximum values for offset & 
     class CustomPagination(Pagination):
         default_offset = 90
         default_limit = 1
-        max_offset = 100`
+        max_offset = 100
         max_limit = 2000
 
 
