@@ -54,7 +54,7 @@ lint: ## check style with flake8
 	flake8 fastapi_contrib tests
 
 test: ## run tests quickly with the default Python
-	py.test --cov=fastapi_contrib --cov-report=term-missing:skip-covered --cov-branch --cov-fail-under=98
+	py.test --cov=fastapi_contrib --cov-report=term-missing:skip-covered --cov-branch --cov-fail-under=97
 
 test-all: ## run tests on every Python version with tox
 	tox

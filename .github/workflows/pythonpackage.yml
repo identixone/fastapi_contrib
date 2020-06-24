@@ -30,4 +30,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        py.test --cov=fastapi_contrib --cov-report=term-missing:skip-covered --cov-branch --cov-fail-under=98
+        py.test --cov=fastapi_contrib --cov-report=term-missing:skip-covered --cov-branch --cov-fail-under=97

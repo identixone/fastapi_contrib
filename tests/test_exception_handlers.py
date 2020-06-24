@@ -445,15 +445,3 @@ async def test_exception_handler_pydantic_validationerror_model():
     assert response["fields"] == [
         {"name": "data", "message": "", "error_code": 400}
     ]
-
-
-def test_parse_error_edge_cases():
-    err = ErrorWrapper(exc=Exception(), loc=("field",))
-    err.msg = "This field contains an error."
-    parsed_dict = parse_error(err, field_names=["random"], raw=True)
-    assert parsed_dict["name"] == err.loc_tuple()[0]
-
-    err = ErrorWrapper(exc=Exception(), loc=())
-    err.msg = "This field contains an error."
-    parsed_dict = parse_error(err, field_names=["random"], raw=True)
-    assert parsed_dict["name"] == "__all__"
