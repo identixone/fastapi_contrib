@@ -46,7 +46,7 @@ class UnauthorizedError(HTTPException):
     def __init__(
         self,
         error_code: int = 401,
-        detail: Any = "Unauthorized",
+        detail: Any = "Unauthorized.",
         fields: List[Dict] = None,
     ):
         """

@@ -1,9 +1,9 @@
-pip==20.0.2
-bumpversion==0.5.3
-wheel==0.34.2
-watchdog==0.10.2
-Sphinx==2.4.3
-twine==3.1.1
+pip>=20.0.2
+bumpversion>=0.5.3
+wheel>=0.34.2
+watchdog>=0.10.2
+Sphinx>=2.4.3
+twine>=3.1.1
 
 contextvars==2.4;python_version<"3.7"
 fastapi>=0.52.0
@@ -14,10 +14,10 @@ motor>=2.0.0
 pytz==2019.3
 ujson<2.0.0
 
-coverage==5.0.3
-flake8==3.7.9
-pytest==5.3.5
-pytest-asyncio==0.10.0
-pytest-runner==5.2
-pytest-cov==2.8.1
-tox==3.14.5
+coverage>=5.0.3
+flake8>=3.7.9
+pytest>=5.3.5
+pytest-asyncio>=0.10.0
+pytest-runner>=5.2
+pytest-cov>=2.8.1
+tox>=3.14.5

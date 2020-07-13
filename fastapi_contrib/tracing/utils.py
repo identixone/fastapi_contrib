@@ -1,3 +1,5 @@
+import warnings
+
 from jaeger_client import Config
 from opentracing.scope_managers.asyncio import AsyncioScopeManager
 
@@ -37,5 +39,13 @@ def setup_opentracing(app):
         scope_manager=AsyncioScopeManager()
     )
 
+    warnings.warn(
+        """
+        tracer object in request.app will be removed in favor of saving it in
+        request.app.state in the next minor version 0.3.0
+        """,
+        FutureWarning
+    )
     # this call also sets opentracing.tracer
-    app.tracer = config.initialize_tracer()
+    app.state.tracer = config.initialize_tracer()
+    app.tracer = app.state.tracer

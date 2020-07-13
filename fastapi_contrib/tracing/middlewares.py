@@ -1,6 +1,7 @@
-from typing import Any
-
 import contextvars
+import warnings
+
+from typing import Any
 
 from opentracing import tags
 from opentracing.propagation import Format
@@ -47,13 +48,25 @@ class OpentracingMiddleware(BaseHTTPMiddleware):
         :param call_next: Next callable Middleware in chain or final view
         :return: Starlette's Response object
         """
-        tracer = request.app.tracer
+        tracer = request.app.state.tracer
         span = self.before_request(request, tracer)
 
         with tracer.scope_manager.activate(span, True) as scope:
             request_span.set(span)
+
+            warnings.warn(
+                """
+                opentracing objects request.state will be removed in favor of
+                saving them in request's scope in the next minor version 0.3.0
+                """,
+                FutureWarning
+            )
+
             request.state.opentracing_span = span
+            request.scope["opentracing_span"] = span
             request.state.opentracing_scope = scope
+            request.scope["opentracing_scope"] = scope
             request.state.opentracing_tracer = tracer
+            request.scope["opentracing_tracer"] = tracer
             response = await call_next(request)
         return response

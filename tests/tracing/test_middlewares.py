@@ -29,7 +29,7 @@ def test_tracer_defined():
     app = FastAPI()
     mock_tracer = MagicMock(spec=Tracer)
     mock_tracer.return_value.__enter__.return_value = mock_tracer
-    app.tracer = mock_tracer
+    app.state.tracer = mock_tracer
     app.add_middleware(OpentracingMiddleware)
 
     @app.get("/")
