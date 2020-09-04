@@ -115,6 +115,7 @@ async def http_exception_handler(
     """
     fields = getattr(exc, "fields", [])
     message = getattr(exc, "detail", "Validation error.")
+    headers = getattr(exc, "headers", None)
     if message and not any(
         [message.endswith("."), message.endswith("?"), message.endswith("!")]
     ):
@@ -124,7 +125,7 @@ async def http_exception_handler(
         "message": message,
         "fields": fields,
     }
-    return UJSONResponse(data, status_code=exc.status_code)
+    return UJSONResponse(data, status_code=exc.status_code, headers=headers)
 
 
 async def validation_exception_handler(
@@ -141,6 +142,7 @@ async def validation_exception_handler(
     :return: UJSONResponse with newly formatted error data
     """
     status_code = getattr(exc, "status_code", 400)
+    headers = getattr(exc, "headers", None)
     fields = raw_errors_to_fields(exc.raw_errors)
 
     if fields:
@@ -155,7 +157,7 @@ async def validation_exception_handler(
         message = message + "."  # pragma: no cover
 
     data = {"error_codes": error_codes, "message": message, "fields": fields}
-    return UJSONResponse(data, status_code=status_code)
+    return UJSONResponse(data, status_code=status_code, headers=headers)
 
 
 async def not_found_error_handler(
@@ -164,9 +166,10 @@ async def not_found_error_handler(
     code = getattr(exc, "error_code", 404)
     detail = getattr(exc, "detail", "Not found.")
     fields = getattr(exc, "fields", [])
+    headers = getattr(exc, "headers", None)
     status_code = getattr(exc, "status_code", 404)
     data = {"error_codes": [code], "message": detail, "fields": fields}
-    return UJSONResponse(data, status_code=status_code)
+    return UJSONResponse(data, status_code=status_code, headers=headers)
 
 
 async def internal_server_error_handler(
@@ -175,9 +178,10 @@ async def internal_server_error_handler(
     code = getattr(exc, "error_code", 500)
     detail = getattr(exc, "detail", "Internal Server Error.")
     fields = getattr(exc, "fields", [])
+    headers = getattr(exc, "headers", None)
     status_code = getattr(exc, "status_code", 500)
     data = {"error_codes": [code], "message": detail, "fields": fields}
-    return UJSONResponse(data, status_code=status_code)
+    return UJSONResponse(data, status_code=status_code, headers=headers)
 
 
 def setup_exception_handlers(app: FastAPI) -> None:
