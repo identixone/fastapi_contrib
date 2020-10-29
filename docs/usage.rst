@@ -69,7 +69,7 @@ Define & use custom permissions based on FastAPI Dependency framework:
 
     class TeapotUserAgentPermission(BasePermission):
 
-        def has_required_permisions(self, request: Request) -> bool:
+        def has_required_permissions(self, request: Request) -> bool:
             return request.headers.get('User-Agent') == "Teapot v1.0"
 
     app = FastAPI()

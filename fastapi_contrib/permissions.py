@@ -12,7 +12,7 @@ class BasePermission(ABC):
 
     Defines basic error message, status & error codes.
 
-    Upon initialization, calls abstract method  `has_required_permisions`
+    Upon initialization, calls abstract method  `has_required_permissions`
     which will be specific to concrete implementation of Permission class.
 
     You would write your permissions like this:
@@ -21,7 +21,7 @@ class BasePermission(ABC):
 
         class TeapotUserAgentPermission(BasePermission):
 
-            def has_required_permisions(self, request: Request) -> bool:
+            def has_required_permissions(self, request: Request) -> bool:
                 return request.headers.get('User-Agent') == "Teapot v1.0"
 
     """
@@ -30,11 +30,11 @@ class BasePermission(ABC):
     error_code = status.HTTP_403_FORBIDDEN
 
     @abstractmethod
-    def has_required_permisions(self, request: Request) -> bool:
+    def has_required_permissions(self, request: Request) -> bool:
         ...
 
     def __init__(self, request: Request):
-        if not self.has_required_permisions(request):
+        if not self.has_required_permissions(request):
             raise HTTPException(
                 status_code=self.status_code,
                 detail=self.error_msg,
