@@ -26,5 +26,5 @@ class IsAuthenticated(BasePermission):
     status_code = status.HTTP_401_UNAUTHORIZED
     error_code = status.HTTP_401_UNAUTHORIZED
 
-    def has_required_permisions(self, request: Request) -> bool:
+    def has_required_permissions(self, request: Request) -> bool:
         return request.user is not None

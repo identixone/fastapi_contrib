@@ -29,8 +29,8 @@ def test_base_permission_has_required_permission(dumb_request):
 
     class NewPermission(BasePermission):
 
-        def has_required_permisions(self, request: Request) -> bool:
-            return super().has_required_permisions(request=request)
+        def has_required_permissions(self, request: Request) -> bool:
+            return super().has_required_permissions(request=request)
 
     with pytest.raises(HTTPException):
         NewPermission(request=dumb_request)
@@ -39,7 +39,7 @@ def test_base_permission_has_required_permission(dumb_request):
 def test_base_permission_no_permission_raises_403(dumb_request):
     class FailPermission(BasePermission):
 
-        def has_required_permisions(self, request: Request) -> bool:
+        def has_required_permissions(self, request: Request) -> bool:
             return False
 
     with pytest.raises(HTTPException) as excinfo:
@@ -52,7 +52,7 @@ def test_base_permission_no_permission_raises_403(dumb_request):
 def test_base_permission_has_permission_not_raises(dumb_request):
     class AllowPermission(BasePermission):
 
-        def has_required_permisions(self, request: Request) -> bool:
+        def has_required_permissions(self, request: Request) -> bool:
             return True
 
     permission = AllowPermission(request=dumb_request)
@@ -63,12 +63,12 @@ def test_base_permission_has_permission_not_raises(dumb_request):
 def test_permissions_dependency_as_class(dumb_request):
     class FailPermission(BasePermission):
 
-        def has_required_permisions(self, request: Request) -> bool:
+        def has_required_permissions(self, request: Request) -> bool:
             return False
 
     class AllowPermission(BasePermission):
 
-        def has_required_permisions(self, request: Request) -> bool:
+        def has_required_permissions(self, request: Request) -> bool:
             return True
 
     dependency = PermissionsDependency(permissions_classes=[AllowPermission])
