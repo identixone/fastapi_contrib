@@ -3,6 +3,7 @@ import motor.motor_asyncio
 import pkgutil
 import pyclbr
 import random
+import inspect
 
 from typing import List
 
@@ -83,19 +84,22 @@ def get_models() -> list:
     models = []
     for app in settings.apps:
         app_path = f"{apps_folder_name}/{app}"
-        modules = [f[1] for f in pkgutil.walk_packages(path=[app_path])]
-        if "models" in modules:
+        modules = [f for f in pkgutil.walk_packages(path=[app_path]) if f.name == 'models']
+        if not modules:
+            continue
+        for module in modules:
             path_to_models = f"{apps_folder_name}.{app}.models"
-            try:
-                module_models = pyclbr.readmodule(path_to_models).keys()
-            except (AttributeError, ImportError):
-                logger.warning(
-                    f"Unable to read module attributes in {path_to_models}"
-                )
-                continue
-            mudule = importlib.import_module(
-                f"{apps_folder_name}.{app}.models"
-            )
+            mudule = importlib.import_module(path_to_models)
+            if module.ispkg:
+                module_models = [x[0] for x in inspect.getmembers(mudule, inspect.isclass)]
+            else:
+                try:
+                    module_models = pyclbr.readmodule(path_to_models).keys()
+                except (AttributeError, ImportError):
+                    logger.warning(
+                        f"Unable to read module attributes in {path_to_models}"
+                    )
+                    continue
             models.extend([getattr(mudule, model) for model in module_models])
 
     return list(filter(lambda x: issubclass(x, MongoDBModel), models))
