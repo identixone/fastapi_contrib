@@ -244,7 +244,7 @@ def test_exception_handler_when_choice_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "One or more values provided are not valid.",
+                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
                 "name": "kind",
                 "error_code": 400,
             }
@@ -262,7 +262,7 @@ def test_exception_handler_when_one_of_multi_choice_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "One or more values provided are not valid.",
+                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
                 "name": "multi",
                 "error_code": 400,
             }
@@ -280,7 +280,7 @@ def test_exception_handler_when_choice_default_and_received_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "One or more values provided are not valid.",
+                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
                 "name": "kind",
                 "error_code": 400,
             }
@@ -300,7 +300,7 @@ def test_exception_handler_when_choice_default_and_received_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "One or more values provided are not valid.",
+                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
                 "name": "kind",
                 "error_code": 400,
             },
