@@ -245,6 +245,7 @@ To setup Jaeger tracer and enable Middleware that captures every request in open
 
     from fastapi import FastAPI
     from fastapi_contrib.tracing.middlewares import OpentracingMiddleware
+    from fastapi_contrib.tracing.utils import setup_opentracing
 
     app = FastAPI()
 
