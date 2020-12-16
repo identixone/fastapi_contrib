@@ -6,7 +6,7 @@ from starlette.responses import UJSONResponse as BaseUJSONResponse
 
 class UJSONResponse(BaseUJSONResponse):
     """
-    Custom Response class, based on default UJSONResponse, but with differences:
+    Custom Response, based on default UJSONResponse, but with differences:
         * Allows to have forward slashes inside strings of JSON
         * Limits output to ASCII and escapes all extended characters above 127.
 

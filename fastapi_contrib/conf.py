@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     :param mongodb_dsn: DSN connection string to MongoDB
     :param mongodb_dbname: String name of a database to connect to in MongoDB
     :param mongodb_id_generator: Dotted path to the function, which will
-                                 be used when assigning IDs for MongoDB records.
+                                 be used when assigning IDs for MongoDB records
     :param now_function: Dotted path to the function, which will be used when
                          assigning `created` field for MongoDB records.
                          Should be used throughout the code for consistency.

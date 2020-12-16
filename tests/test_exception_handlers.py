@@ -26,7 +26,6 @@ from starlette.testclient import TestClient
 
 from fastapi_contrib.exception_handlers import (
     setup_exception_handlers,
-    parse_error,
     validation_exception_handler,
 )
 
@@ -64,7 +63,7 @@ class Item(BaseModel):
 
 
 class RegexpItem(BaseModel):
-    name: constr(regex=r"^[a-z]$")
+    name: constr(regex=r"^[a-z]$")  # noqa
 
 
 class Kind(str, enum.Enum):
@@ -244,7 +243,8 @@ def test_exception_handler_when_choice_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
+                "message": "Value is not a valid enumeration member; "
+                           "permitted: 'a', 'b', 'c'.",
                 "name": "kind",
                 "error_code": 400,
             }
@@ -262,7 +262,8 @@ def test_exception_handler_when_one_of_multi_choice_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
+                "message": "Value is not a valid enumeration member; "
+                           "permitted: 'a', 'b', 'c'.",
                 "name": "multi",
                 "error_code": 400,
             }
@@ -280,7 +281,8 @@ def test_exception_handler_when_choice_default_and_received_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
+                "message": "Value is not a valid enumeration member; "
+                           "permitted: 'a', 'b', 'c'.",
                 "name": "kind",
                 "error_code": 400,
             }
@@ -300,7 +302,8 @@ def test_exception_handler_when_choice_default_and_received_invalid():
         assert response["message"] == "Validation error."
         assert response["fields"] == [
             {
-                "message": "Value is not a valid enumeration member; permitted: 'a', 'b', 'c'.",
+                "message": "Value is not a valid enumeration member; "
+                           "permitted: 'a', 'b', 'c'.",
                 "name": "kind",
                 "error_code": 400,
             },

@@ -13,7 +13,7 @@ class MongoDBClient(object):
     Singleton client for interacting with MongoDB.
     Operates mostly using models, specified when making DB queries.
 
-    Implements only part of internal `motor` methods, but can be populated more.
+    Implements only part of internal `motor` methods, but can be populated more
 
     Please don't use it directly, use `fastapi_contrib.db.utils.get_db_client`.
     """

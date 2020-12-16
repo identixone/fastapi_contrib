@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from asyncio import Future
-
 import pytest
 
 from fastapi import FastAPI
@@ -107,7 +105,9 @@ async def test_update_one():
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_update_one_params():
-    with patch('fastapi_contrib.db.client.MongoDBClient.update_one', new_callable=AsyncMock) as mock_update:
+    with patch(
+        'fastapi_contrib.db.client.MongoDBClient.update_one',
+            new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
 
             class Meta:
@@ -121,13 +121,20 @@ async def test_update_one_params():
             filter_kwargs={"id": 1}, kwargs={'$set': {'bla': 1}}
         )
 
-        mock_update.mock.assert_called_with(client, Model, filter_kwargs={'id': 1}, kwargs={'$set': {'bla': 1}})
+        mock_update.mock.assert_called_with(
+            client,
+            Model,
+            filter_kwargs={'id': 1},
+            kwargs={'$set': {'bla': 1}}
+        )
 
 
 @pytest.mark.asyncio
 @override_settings(fastapi_app="tests.db.test_client.app")
 async def test_update_many_params():
-    with patch('fastapi_contrib.db.client.MongoDBClient.update_many', new_callable=AsyncMock) as mock_update:
+    with patch(
+        'fastapi_contrib.db.client.MongoDBClient.update_many',
+            new_callable=AsyncMock) as mock_update:
         class Model(MongoDBTimeStampedModel):
             class Meta:
                 collection = "collection"
@@ -140,7 +147,11 @@ async def test_update_many_params():
             filter_kwargs={"id": 1}, kwargs={'$set': {'bla': 1}}
         )
 
-        mock_update.mock.assert_called_with(client, Model, filter_kwargs={'id': 1}, kwargs={'$set': {'bla': 1}})
+        mock_update.mock.assert_called_with(
+            client,
+            Model,
+            filter_kwargs={'id': 1}, kwargs={'$set': {'bla': 1}}
+        )
 
 
 @pytest.mark.asyncio
@@ -211,7 +222,9 @@ async def test_list_with_sort():
 
         await model.list(model, _limit=0, _offset=0, _sort=[('i', -1)])
 
-        mock_list.assert_called_with(Model, _limit=0, _offset=0, _sort=[('i', -1)])
+        mock_list.assert_called_with(
+            Model, _limit=0, _offset=0, _sort=[('i', -1)]
+        )
 
         await model.list(model)
 

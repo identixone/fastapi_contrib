@@ -10,6 +10,10 @@ Development Lead
 Contributors
 ------------
 
-* Yaroslav Ulanovich <yul@datacorp.ee>
-* BumagniyPacket <rly@datacorp.ee>
-* aCLr <a.ch.clr@gmail.com>
+* @yarara
+* @BumagniyPacket
+* @aCLr
+* @rsommerard
+* @mumtozvalijonov
+* @danield137
+* @Haider8

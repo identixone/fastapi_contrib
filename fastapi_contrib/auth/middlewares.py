@@ -22,7 +22,10 @@ class AuthenticationMiddleware(BaseAuthenticationMiddleware):
 
     """
     @staticmethod
-    def default_on_error(conn: HTTPConnection, exc: Exception) -> UJSONResponse:
+    def default_on_error(
+        conn: HTTPConnection,
+        exc: Exception
+    ) -> UJSONResponse:
         """
         Overriden method just to make sure we return response in our format.
 

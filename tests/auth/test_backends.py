@@ -36,7 +36,7 @@ def test_user_not_logged_in():
 
 def test_invalid_auth_header():
     with TestClient(app) as client:
-        response = client.get("/me/", headers={"Authorization": f"toookennn"})
+        response = client.get("/me/", headers={"Authorization": "toookennn"})
         assert response.status_code == 403
         response = response.json()
         assert response["code"] == 403
@@ -45,7 +45,7 @@ def test_invalid_auth_header():
 
 def test_invalid_auth_header_keyword():
     with TestClient(app) as client:
-        response = client.get("/me/", headers={"Authorization": f"Bearer asd"})
+        response = client.get("/me/", headers={"Authorization": "Bearer asd"})
         assert response.status_code == 403
         response = response.json()
         assert response["code"] == 403
@@ -62,7 +62,7 @@ def test_invalid_auth_header_keyword():
 )
 def test_invalid_token():
     with TestClient(app) as client:
-        response = client.get("/me/", headers={"Authorization": f"Token t"})
+        response = client.get("/me/", headers={"Authorization": "Token t"})
         assert response.status_code == 200
         response = response.json()
         assert response["username"] is None
@@ -78,7 +78,7 @@ def test_invalid_token():
 )
 def test_invalid_user():
     with TestClient(app) as client:
-        response = client.get("/me/", headers={"Authorization": f"Token t"})
+        response = client.get("/me/", headers={"Authorization": "Token t"})
         assert response.status_code == 200
         response = response.json()
         assert response["username"] is None
@@ -95,7 +95,7 @@ def test_invalid_user():
 def test_user_logged_in():
     with TestClient(app) as client:
         response = client.get(
-            "/me/", headers={"Authorization": f"Token t"}
+            "/me/", headers={"Authorization": "Token t"}
         )
         assert response.status_code == 200
         response = response.json()

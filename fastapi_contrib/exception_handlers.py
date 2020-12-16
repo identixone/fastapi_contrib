@@ -22,7 +22,11 @@ def parse_error(
     """
 
     if isinstance(err.exc, EnumError):
-        message = "One or more values provided are not valid."
+        permitted_values = ", ".join(
+            [f"'{val}'" for val in err.exc.enum_values]
+        )
+        message = f"Value is not a valid enumeration member; " \
+                  f"permitted: {permitted_values}."
     elif isinstance(err.exc, StrRegexError):
         message = "Provided value doesn't match valid format."
     else:

@@ -8,9 +8,6 @@ from setuptools import setup, find_packages
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-with open("HISTORY.rst") as history_file:
-    history = history_file.read()
-
 requirements = [
     'fastapi>=0.52.0',
     'pydantic>=1.4',
@@ -50,7 +47,7 @@ setup(
         ],
     },
     license="MIT license",
-    long_description=readme + "\n\n" + history,
+    long_description=readme,
     include_package_data=True,
     keywords="fastapi_contrib",
     name="fastapi_contrib",
@@ -59,6 +56,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/identixone/fastapi_contrib",
-    version="0.2.8",
+    version="0.2.9",
     zip_safe=False,
 )

@@ -46,7 +46,7 @@ def authed(request: Request):
 def test_has_auth_permission():
     with TestClient(app) as client:
         response = client.get(
-            "/authed/", headers={"Authorization": f"Token t"}
+            "/authed/", headers={"Authorization": "Token t"}
         )
         assert response.status_code == 200
         response = response.json()
@@ -63,7 +63,7 @@ def test_has_auth_permission():
 def test_doesnt_have_auth_permission():
     with TestClient(app) as client:
         response = client.get(
-            "/authed/", headers={"Authorization": f"Token t"}
+            "/authed/", headers={"Authorization": "Token t"}
         )
         assert response.status_code == 401
         response = response.json()

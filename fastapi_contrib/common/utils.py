@@ -14,7 +14,7 @@ from fastapi_contrib.conf import settings
 
 def resolve_dotted_path(path: str) -> Any:
     """
-    Retrieves attribute (var, function, class, etc.) from module by dotted path.
+    Retrieves attribute (var, function, class, etc.) from module by dotted path
 
     .. code-block:: python
 
@@ -50,8 +50,8 @@ def get_logger() -> Any:
                 {
                     "sink": sys.stdout,
                     "level": settings.log_level,
-                    "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-                    "<level>{level: <8}</level> | "
+                    "format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>"
+                    " | <level>{level: <8}</level> | "
                     "<cyan>{name}</cyan>:<cyan>{function}</cyan>:"
                     "<cyan>{line}</cyan> -"
                     " <level>{message}</level>",

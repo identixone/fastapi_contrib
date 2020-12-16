@@ -92,7 +92,7 @@ class NotFoundError(HTTPException):
         fields: List[Dict] = None,
     ):
         """
-        Generic 404 Not Found HTTP Exception with support for custom error code.
+        Generic 404 Not Found HTTP Exception with support for custom error code
 
         :param error_code: Custom error code, unique throughout the app
         :param detail: detailed message of the error

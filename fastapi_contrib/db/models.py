@@ -85,7 +85,9 @@ class MongoDBModel(BaseModel):
     @async_timing
     async def list(cls, raw=True, _limit=0, _offset=0, _sort=None, **kwargs):
         db = get_db_client()
-        cursor = db.list(cls, _limit=_limit, _offset=_offset, _sort=_sort, **kwargs)
+        cursor = db.list(
+            cls, _limit=_limit, _offset=_offset, _sort=_sort, **kwargs
+        )
 
         result = []
         async for document in cursor:

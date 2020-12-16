@@ -84,14 +84,19 @@ def get_models() -> list:
     models = []
     for app in settings.apps:
         app_path = f"{apps_folder_name}/{app}"
-        modules = [f for f in pkgutil.walk_packages(path=[app_path]) if f.name == 'models']
+        modules = [
+            f for f in pkgutil.walk_packages(path=[app_path])
+            if f.name == 'models'
+        ]
         if not modules:
             continue
         for module in modules:
             path_to_models = f"{apps_folder_name}.{app}.models"
             mudule = importlib.import_module(path_to_models)
             if module.ispkg:
-                module_models = [x[0] for x in inspect.getmembers(mudule, inspect.isclass)]
+                module_models = [
+                    x[0] for x in inspect.getmembers(mudule, inspect.isclass)
+                ]
             else:
                 try:
                     module_models = pyclbr.readmodule(path_to_models).keys()
