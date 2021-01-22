@@ -12,7 +12,7 @@ jaeger-client>=4.1.0
 opentracing>=2.2.0
 motor>=2.0.0
 pytz==2019.3
-ujson<2.0.0
+ujson==4.0.2
 
 coverage>=5.0.3
 flake8>=3.7.9
