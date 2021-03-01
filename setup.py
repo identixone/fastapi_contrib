@@ -9,8 +9,7 @@ with open("README.rst") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    'fastapi>=0.52.0',
-    'pydantic>=1.4',
+    'fastapi>=0.63.0',
     'contextvars;python_version<"3.7"'
 ]
 
@@ -56,6 +55,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/identixone/fastapi_contrib",
-    version="0.2.9",
+    version="0.2.10",
     zip_safe=False,
 )
