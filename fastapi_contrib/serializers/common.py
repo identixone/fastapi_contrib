@@ -119,7 +119,7 @@ class Serializer(BaseModel):
             hasattr(self, "Meta")
             and getattr(self.Meta, "model", None) is not None
         ):
-            instance = self.Meta.model(**self.__values__)
+            instance = self.Meta.model(**self.__dict__)
             await instance.save(
                 include=include, exclude=exclude, rewrite_fields=rewrite_fields
             )

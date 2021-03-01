@@ -1,5 +1,14 @@
+import os
+from pathlib import Path
+
 from pydantic import BaseSettings
-from typing import List
+from typing import List, Optional
+
+contrib_secrets_dir: Optional[str] = os.environ.get(
+    "CONTRIB_SECRETS_DIR", "/run/secrets"
+)
+if not Path(contrib_secrets_dir).exists():
+    contrib_secrets_dir = None
 
 
 class Settings(BaseSettings):
@@ -67,6 +76,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_prefix = "CONTRIB_"
+        secrets_dir = contrib_secrets_dir
 
 
 # TODO: ability to override this settings class from the actual app
