@@ -9,8 +9,7 @@ with open("README.rst") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    'fastapi>=0.63.0',
-    'contextvars;python_version<"3.7"'
+    'fastapi>=0.63.0'
 ]
 
 setup_requirements = ["pytest-runner"]
@@ -26,9 +25,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     description="Opinionated set of utilities on top of FastAPI",
     install_requires=requirements,
