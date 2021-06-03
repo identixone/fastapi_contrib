@@ -54,6 +54,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/identixone/fastapi_contrib",
-    version="0.2.10",
+    version="0.2.11",
     zip_safe=False,
 )
