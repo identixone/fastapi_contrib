@@ -9,7 +9,7 @@ with open("README.rst") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    'fastapi>=0.63.0'
+    'fastapi>=0.65.1'
 ]
 
 setup_requirements = ["pytest-runner"]
