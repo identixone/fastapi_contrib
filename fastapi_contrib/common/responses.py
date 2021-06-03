@@ -1,10 +1,10 @@
 import typing
 import ujson
 
-from starlette.responses import UJSONResponse as BaseUJSONResponse
+from starlette.responses import JSONResponse
 
 
-class UJSONResponse(BaseUJSONResponse):
+class UJSONResponse(JSONResponse):
     """
     Custom Response, based on default UJSONResponse, but with differences:
         * Allows to have forward slashes inside strings of JSON
