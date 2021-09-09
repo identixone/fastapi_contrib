@@ -42,7 +42,7 @@ class AuthBackend(AuthenticationBackend):
         if not authorization:
             return False, None
         scheme, credentials = get_authorization_scheme_param(authorization)
-        if not (authorization and scheme and credentials):
+        if not scheme or not credentials:
             raise AuthenticationError("Not authenticated")
         if scheme.lower() != "token":
             raise AuthenticationError("Invalid authentication credentials")
