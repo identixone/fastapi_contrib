@@ -72,8 +72,7 @@ def get_current_app() -> FastAPI:
     :return: FastAPI app
     """
     # TODO: cache this
-    app = resolve_dotted_path(settings.fastapi_app)
-    return app
+    return resolve_dotted_path(settings.fastapi_app)
 
 
 def async_timing(func):

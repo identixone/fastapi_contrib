@@ -22,9 +22,7 @@ def parse_error(
     """
 
     if isinstance(err.exc, EnumError):
-        permitted_values = ", ".join(
-            [f"'{val}'" for val in err.exc.enum_values]
-        )
+        permitted_values = ", ".join(f"'{val}'" for val in err.exc.enum_values)
         message = f"Value is not a valid enumeration member; " \
                   f"permitted: {permitted_values}."
     elif isinstance(err.exc, StrRegexError):
@@ -51,13 +49,14 @@ def parse_error(
                 name = str(err.loc_tuple()[0])
         else:
             name = "__all__"
+    elif (
+        len(err.loc_tuple()) == 2
+        or len(err.loc_tuple()) != 2
+        and len(err.loc_tuple()) == 1
+    ):
+        name = str(err.loc_tuple()[0])
     else:
-        if len(err.loc_tuple()) == 2:
-            name = str(err.loc_tuple()[0])
-        elif len(err.loc_tuple()) == 1:
-            name = str(err.loc_tuple()[0])
-        else:
-            name = "__all__"
+        name = "__all__"
 
     if name in field_names:
         return None

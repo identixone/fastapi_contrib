@@ -137,26 +137,23 @@ class Serializer(BaseModel):
 
         :return: result of update operation
         """
-        if (
-            hasattr(self, "Meta")
-            and getattr(self.Meta, "model", None) is not None
-        ):
-            data = {}
-            fields = self.dict(skip_defaults=skip_defaults)
+        if not hasattr(self, "Meta") or getattr(self.Meta, "model", None) is None:
+            return
 
-            if not array_fields:
-                array_fields = []
+        data = {}
+        fields = self.dict(skip_defaults=skip_defaults)
 
-            if array_fields:
-                tmp_data = {}
-                for i in array_fields:
-                    tmp_data[i] = {"$each": fields.pop(i)}
-                data.update({"$push": tmp_data})
-            if fields:
-                data.update({"$set": fields})
-            return await self.Meta.model.update_one(
-                filter_kwargs=filter_kwargs, **data
-            )
+        if not array_fields:
+            array_fields = []
+
+        if array_fields:
+            tmp_data = {i: {"$each": fields.pop(i)} for i in array_fields}
+            data.update({"$push": tmp_data})
+        if fields:
+            data.update({"$set": fields})
+        return await self.Meta.model.update_one(
+            filter_kwargs=filter_kwargs, **data
+        )
 
     async def update_many(
         self,
@@ -170,26 +167,23 @@ class Serializer(BaseModel):
 
         :return: result of update many operation
         """
-        if (
-            hasattr(self, "Meta")
-            and getattr(self.Meta, "model", None) is not None
-        ):
-            data = {}
-            fields = self.dict(skip_defaults=skip_defaults)
+        if not hasattr(self, "Meta") or getattr(self.Meta, "model", None) is None:
+            return
 
-            if not array_fields:
-                array_fields = []
+        data = {}
+        fields = self.dict(skip_defaults=skip_defaults)
 
-            if array_fields:
-                tmp_data = {}
-                for i in array_fields:
-                    tmp_data[i] = {"$each": fields.pop(i)}
-                data.update({"$push": tmp_data})
-            if fields:
-                data.update({"$set": fields})
-            return await self.Meta.model.update_many(
-                filter_kwargs=filter_kwargs, **data
-            )
+        if not array_fields:
+            array_fields = []
+
+        if array_fields:
+            tmp_data = {i: {"$each": fields.pop(i)} for i in array_fields}
+            data.update({"$push": tmp_data})
+        if fields:
+            data.update({"$set": fields})
+        return await self.Meta.model.update_many(
+            filter_kwargs=filter_kwargs, **data
+        )
 
     def dict(self, *args, **kwargs) -> dict:
         """
@@ -212,8 +206,7 @@ class Serializer(BaseModel):
             exclude.update(self.Meta.write_only_fields)
 
         kwargs.update({"exclude": exclude})
-        original = super().dict(*args, **kwargs)
-        return original
+        return super().dict(*args, **kwargs)
 
     class Meta(AbstractMeta):
         ...

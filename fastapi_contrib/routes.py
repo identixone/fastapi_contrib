@@ -17,15 +17,15 @@ class ValidationErrorLoggingRoute(APIRoute):
                 return await original_route_handler(request)
             except RequestValidationError as exc:
                 body = await request.body()
-                if not body:
-                    status_code = 400
-                    data = {
-                        "code": status_code,
-                        "detail": "Empty body for this request is not valid.",
-                        "fields": [],
-                    }
-                    return UJSONResponse(data, status_code=status_code)
-                else:
+                if body:
                     raise exc
+
+                status_code = 400
+                data = {
+                    "code": status_code,
+                    "detail": "Empty body for this request is not valid.",
+                    "fields": [],
+                }
+                return UJSONResponse(data, status_code=status_code)
 
         return custom_route_handler

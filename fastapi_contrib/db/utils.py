@@ -63,8 +63,7 @@ def get_db_client():
     """
     from fastapi_contrib.db.client import MongoDBClient
 
-    client = MongoDBClient()
-    return client
+    return MongoDBClient()
 
 
 def get_models() -> list:
