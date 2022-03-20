@@ -10,7 +10,7 @@ fastapi>=0.63.0
 jaeger-client>=4.1.0
 opentracing>=2.2.0
 motor>=2.0.0
-pytz==2019.3
+pytz==2022.1
 ujson<2.0.0
 
 coverage>=5.0.3
