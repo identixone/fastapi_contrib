@@ -1,5 +1,5 @@
 ===============
-FastAPI Contrib
+FastAPI Contrib [Deprecated]
 ===============
 
 
